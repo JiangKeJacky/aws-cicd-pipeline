@@ -29,7 +29,7 @@ sudo ./aws/install
 
 # 测试是否成功
 
-[ $(/usr/local/bin/aws --version) -eq '0' ] {
+/usr/local/bin/aws --version || {
   &>2 echo '[ERROR] Installation failed.'
 }
 
