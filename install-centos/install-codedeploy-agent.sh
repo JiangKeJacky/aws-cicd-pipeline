@@ -33,18 +33,18 @@ fi
 
 # 安装必须的库
 
-yum update && yum install ruby gem git wget -y || {
+yum update -y && yum install ruby gem git wget -y || {
   &>2 echo '[ERROR] Cannot install or update ruby, wget.';
   exit 1;
 }
 
-#
+# 如果 CodeDeloy Agent 已经安装过，停止并移除
 
 echo '[INFO] Stop installed agent if it exists...'
 $CODEDEPLOY_BIN stop
 yum remove codedeploy-agent -y
 
-# 
+# 下载 CodeDeploy Agent
 
 echo '[INFO] Downloading agent...'
 
@@ -54,13 +54,13 @@ if ! wget https://aws-codedeploy-${REGION}.s3.${REGION}.amazonaws.com.cn/latest/
   exit 1;
 fi
 
-#
+# 开始安装
 
 echo '[INFO] Installing agent...'
 
 ./install auto
 
-#
+# 尝试启动 CodeDeploy Agent
 
 service codedeploy-agent start && sleep 3
 
@@ -69,7 +69,7 @@ service codedeploy-agent status || {
   exit 1;
 }
 
-#
+# 创建自管主机专属配置文件并写入角色、区域和密钥地址
 
 echo '[INFO] Creating on-premises configuration file...'
 
@@ -79,12 +79,12 @@ aws_credentials_file: /tmp/code_deploy_session
 region: ${REGION}
 EOF
 
-#
+# 自动获取角色信息
 
 echo '[INFO] Installing STS helper...'
 
 aws=/usr/local/bin/aws
-source <($aws sts assume-role --role-arn arn:aws-cn:iam::12345678:role/CodeDeployInstanceRole --role-session-name test --output text | awk 'FNR==2 {print "export AWS_ACCESS_KEY_ID=" $2; print "export AWS_SECRET_ACCESS_KEY=" $4; print "export AWS_SESSION_TOKEN=" $5}')
+source <($aws sts assume-role --role-arn $IAM_ROLE_ARN --role-session-name test --output text | awk 'FNR==2 {print "export AWS_ACCESS_KEY_ID=" $2; print "export AWS_SECRET_ACCESS_KEY=" $4; print "export AWS_SESSION_TOKEN=" $5}')
 
 CALLER_ID="$($aws sts get-caller-identity --output text)"
 ASSUMED_ROLE=$(echo $IAM_ROLE_ARN | sed 's|:role/|:assumed-role/|; s|:iam:|:sts:|')
