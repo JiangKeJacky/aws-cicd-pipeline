@@ -1,0 +1,121 @@
+pipeline {
+	agent any
+
+   	options {
+        	buildDiscarder(logRotator(numToKeepStr: '5',daysToKeepStr:'16'))
+        	timeout(time: 30, unit: 'MINUTES')
+    	}
+
+    // parameters {
+
+    //     string(name: 'GIT_REPO', defaultValue: 'https://test.com/scm/myproject.git', description: '')
+    //     choice(choices: ['YES','NO'], description: 'default to YES', name: 'DeployFlag')
+    //     choice(choices: ['cn-east-1','cn-west-2'], description: '', name: 'REGION')
+    //     choice(choices: ['111011193316', '2222215333393'], description: '', name: 'USER_ID')
+
+    //     choice(choices: ['dev', 'qa', 'prd'], description: '', name: 'RUN_ENV')
+    //     choice(choices: ['module1','module2','module3','module4'], description: '', name: 'application_dir')
+    //     choice(choices: ['s3-code-package','s3-code-package-bg'], description: '', name: 'bucket')
+
+    // }
+
+    environment {
+        PROJECT_NAME = "myproject"
+        JENKIN_ROLE_NAME='role-Deploy'
+        ROOT_BACKEND_PATH = "${WORKSPACE}"
+
+        VERSION_NUMBER = "0.0.${BUILD_NUMBER}.${RUN_ENV}"
+        mvn_package_name = "target/${application_dir}-0.0.1-SNAPSHOT.zip"
+        application_dirs = "${PROJECT_NAME}/${application_dir}"
+    }
+
+    stages {
+
+        stage('Build') {
+            steps {
+                // Get some code from a GitHub repository
+                git 'http://root:abcd1234@ec2-54-251-170-35.ap-southeast-1.compute.amazonaws.com/root/cicd-demo.git'
+
+                // Run Maven on a Unix agent.
+                //sh "mvn -Dmaven.test.failure.ignore=true clean package"
+
+                // //代码编译
+                // sh "mvn clean compile"
+
+                // //单元测试
+                // sh "mvn -Dtest=com.mgiglione.service.test.unit.UnitTests test"
+
+                // //集成测试
+                // sh "mvn -Dtest=com.mgiglione.service.test.integration.IntegrationTests test"
+
+                // //代码编译
+                // sh "mvn package"
+
+                // To run Maven on a Windows agent, use
+                // bat "mvn -Dmaven.test.failure.ignore=true clean package"
+            }
+
+            // post {
+            //     // If Maven was able to run the tests, even if some of the test
+            //     // failed, record the test results and archive the jar file.
+            //     success {
+            //         //junit '**/target/surefire-reports/TEST-*.xml'
+            //         //archiveArtifacts 'target/*.jar'
+            //     }
+            // }
+        }
+
+        stage('PackageToS3' ) {
+	    //是否部署判断，参数化
+	    // when {
+        //         environment ignoreCase: true, name: 'DeployFlag', value: 'YES'
+        //         beforeAgent true
+        //     }
+            steps{
+                // echo "aws"
+                // sh "aws s3 ls"
+                // sh "aws s3 cp ${application_dirs}/${mvn_package_name} s3://devops-template-build-packages/${application_dirs}_${VERSION_NUMBER}.zip"
+                // echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
+                    script{
+
+                        // def UPLOAD_SCRIPT = '''
+                        //     cd myproject
+                        //     mvn package -U -Dmaven.test.skip=true -am
+                        //     cd ../
+                        //     source terraform_scripts/role.sh ${USER_ID} ${JENKIN_ROLE_NAME}
+                        //     aws s3 cp ${application_dirs}/${mvn_package_name} s3://${bucket}/code-package/${application_dirs}_${VERSION_NUMBER}.zip
+                        //     '''
+                        def UPLOAD_SCRIPT = '''
+                        export AWS_DEFAULT_REGION=ap-southeast-1
+                        export AWS_ACCESS_KEY_ID=ASIASYL4OVBJ7LFR45WS
+                        export AWS_SECRET_ACCESS_KEY=T27JT0DKbxYSoAJlfyN50DRuUtDsZ0BMSUjKttpU
+                        export AWS_SESSION_TOKEN=IQoJb3JpZ2luX2VjENH//////////wEaCXVzLWVhc3QtMSJHMEUCIGeiAGE+JqAjO3wVOhify4IGOzl/qPzQFbxRFpaQpl5zAiEAoyuvjgaZTbEQ9voKWqpH8RQPs4MgL/2iWaiALF6iy0AqoAIIiv//////////ARAAGgwxODk3NzY0MzkzNzkiDJsH49etyKTUwBY6Qyr0Ae6ryo5NhSUV3Ur822+h2h6F7hFC6P8uQAxvr+pyXy3Xea+eWf03onXU8d3nIUwQuGqYIrMBnXue0TvBH9Xh9yDX3yJoX8swKoZXOPWR1S0Z7LTAmxXwAjHXAtM5TkGjm6Oq6/EtRt/ipev6ehrYCyPoJ8P5fcWg4J+1BNTCo/lzWYs0Iy46hpNDN+rYe7LEGjx5QociBuavlH4i9aM4m2vJE4Ue0KvbinkRFr1iGUDmoIMQQqFOk0ybrJblS17ljtT8KfShWTNqp36L84DZeka0O15w/m1cG7hIlsnk16VJ3JCCQKA5DFnTNcHunKOEl1MHymMw1/aBhgY6nQHcZNG1dj10i8RYT8f5QLRuw8EHFxIXCPYQTH5I8oSNguAaGTXDgk5ZOjrYZnIP5uOkk0c/45cEp4JlOWR8EBCPnBeKHCUjUK+u5EwcROrChryf/12OqR8N1HuO6C+bG249OYRPb2t3blTvDMGNVuCULwFZf09ZyPp6f/IRfQw4xBEWYL1lk8FbS9FVt3588f4lgZTUm/NSIKh0y/O3
+                        aws s3 ls
+                        aws s3 cp ${application_dirs}/${mvn_package_name} s3://${bucket}/code-package/${application_dirs}_${VERSION_NUMBER}.zip
+                        '''
+                        sh UPLOAD_SCRIPT
+                        echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
+                    }
+            }
+        }
+
+
+	stage('deploy') {
+		steps{
+			configFileProvider([configFile(fileId: '63111193b-123ac-433-a910-18fa33sdf57', variable: 'role')]) {
+				script{
+					def DEPLOY_SCRIPT = '''
+							   pwd
+							   source ${role} ${USER_ID} ${JENKIN_ROLE_NAME}
+							   aws --region ${REGION} deploy create-deployment \
+							   --application-name myproject-code-deploy \
+							   --deployment-group-name ${code_deploy_group} \
+								--s3-location bucket=${bucket},key=code-package/${application_dirs}_${VERSION_NUMBER}.zip,bundleType=zip
+							   '''
+				sh DEPLOY_SCRIPT
+				}
+			}
+		}
+	}
+}
+}
