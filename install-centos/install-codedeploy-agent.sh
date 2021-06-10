@@ -74,25 +74,9 @@ service codedeploy-agent status || {
 echo '[INFO] Creating on-premises configuration file...'
 
 tee /etc/codedeploy-agent/conf/codedeploy.onpremises.yml <<EOF
-iam-session-arn: ${IAM_ROLE_ARN}
-aws_credentials_file: /tmp/code_deploy_session
+iam_session_arn: ${IAM_ROLE_ARN}
+aws_credentials_file: /etc/codedeploy-agent/conf/credentials
 region: ${REGION}
 EOF
-
-# 自动获取角色信息
-
-echo '[INFO] Installing STS helper...'
-
-aws=/usr/local/bin/aws
-source <($aws sts assume-role --role-arn $IAM_ROLE_ARN --role-session-name test --output text | awk 'FNR==2 {print "export AWS_ACCESS_KEY_ID=" $2; print "export AWS_SECRET_ACCESS_KEY=" $4; print "export AWS_SESSION_TOKEN=" $5}')
-
-CALLER_ID="$($aws sts get-caller-identity --output text)"
-ASSUMED_ROLE=$(echo $IAM_ROLE_ARN | sed 's|:role/|:assumed-role/|; s|:iam:|:sts:|')
-
-echo "$CALLER_ID" | awk 'FNR == 1 { print $2 }' | grep $ASSUMED_ROLE -q
-
-[ $? -eq 0 ] || {
-  &>2 echo '[ERROR] Unable to assume role.';
-}
 
 echo '[INFO] CodeDeploy agent installed.'
