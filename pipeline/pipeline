@@ -14,19 +14,35 @@ pipeline {
     //     choice(choices: ['111011193316', '2222215333393'], description: '', name: 'USER_ID')
 
     //     choice(choices: ['dev', 'qa', 'prd'], description: '', name: 'RUN_ENV')
-    //     choice(choices: ['module1','module2','module3','module4'], description: '', name: 'application_dir')
-    //     choice(choices: ['s3-code-package','s3-code-package-bg'], description: '', name: 'bucket')
+
 
     // }
 
     environment {
-        PROJECT_NAME = "myproject"
-        JENKIN_ROLE_NAME='role-Deploy'
-        ROOT_BACKEND_PATH = "${WORKSPACE}"
+        PROJECT_NAME            = "myproject"
+        JENKIN_ROLE_NAME        = 'role-Deploy'
+        ROOT_BACKEND_PATH       = "${WORKSPACE}"
 
-        VERSION_NUMBER = "0.0.${BUILD_NUMBER}.${RUN_ENV}"
-        mvn_package_name = "target/${application_dir}-0.0.1-SNAPSHOT.zip"
-        application_dirs = "${PROJECT_NAME}/${application_dir}"
+        RUN_ENV                 = "prd"
+        VERSION_NUMBER          = "0.0.${BUILD_NUMBER}.${RUN_ENV}"
+        MVN_PACKAGE_NAME        = "target/${application_dir}-0.0.1-SNAPSHOT.zip"
+        APPLICATION_DIR         = "${PROJECT_NAME}"
+
+        //GIT repository
+        GIT_REPOSITORY          = "http://root:abcd1234@ec2-54-251-170-35.ap-southeast-1.compute.amazonaws.com/root/cicd-demo.git"
+
+        //AWS access key
+        AWS_DEFAULT_REGION      = "ap-southeast-1"
+        AWS_ACCESS_KEY_ID       = "ASIASYL4OVBJ66GDMOFM"
+        AWS_SECRET_ACCESS_KEY   = "VnG2riT1i7qY2lTKRsbna6nlMV3kNsyq1+CVUo+d"
+        AWS_SESSION_TOKEN       = "IQoJb3JpZ2luX2VjEOL//////////wEaCXVzLWVhc3QtMSJIMEYCIQD8vohR4g6bPRNQ8FicaTVdWRuSjQ6gV8lv4zzgc+jIGwIhALfdlEdrSAIE1K4aot0wv6tzkvAbEGhZ7v5gplGV3OvlKqACCJv//////////wEQABoMMTg5Nzc2NDM5Mzc5IgxNMsZbssNEiS75RYYq9AG3EcanPPQPdRYmfIP1j7Abnw/EEKbjkJmmyUjMMS9oGlAQ++s7v1t4dRubtZRHz1xhEzrd2VxJUD6yvJ8FUsh91MG88Mebxhr5skIVzEoZ5g9uWiD6FdiJrECGUHgsG6z1P+qnVB9zbYm4JYmBUeg/AY6Qn8swQUI9VWuTf9/lOo4P5a5FwwSw1QQuvJMGIpI9haVB2uiQeLhknSBT4eSPpmwhNn6vOlxnQTG6RT/Wrs6oOfj0eQX0yxUJQE1nybMebv0dgD0H/c+yBwYHp+EVKuBBM0Mf8PkU1NFndvplevHrsCpU1V2CiVaTbqSys7N2ROh5MLPThYYGOpwBaZs1nygDSx438oTXL7XyaUNqDrTutBMu2FoYiysVlue3IZJnYeh6o14+NF94mfDFbCTcYuxkYyNgpWdnneTJTBGe1/Uge2GcJY1g2ZaEowb4q6IxmagX7fF7TdtdGMQfgU/YXOG3lu/cD/FcKnvQIKcufAVdsWiPR3ZTk8btSdsynh0/flrndvFy94g0vYRVvxou4AFcxJeJfY7X"
+
+        //s3 bucket for store the code package, should be created before the pipeline first run
+        AWS_S3_BUCKET_CODE_PACKAGE      = "s3-code-package"
+
+        //initialize codedeploy for a pipeline,  should be created before the pipeline first run
+        AWS_DEPLOYMENT_APPLICATION_NAME = "SpringBoot_Test"
+        AWS_DEPLOYMENT_GROUP            = "SpringBoot_DepGroup"
     }
 
     stages {
@@ -34,7 +50,7 @@ pipeline {
         stage('Build') {
             steps {
                 // Get some code from a GitHub repository
-                git 'http://root:abcd1234@ec2-54-251-170-35.ap-southeast-1.compute.amazonaws.com/root/cicd-demo.git'
+                git "${GIT_REPOSITORY}"
 
                 // Run Maven on a Unix agent.
                 //sh "mvn -Dmaven.test.failure.ignore=true clean package"
@@ -76,6 +92,17 @@ pipeline {
                 // sh "aws s3 ls"
                 // sh "aws s3 cp ${application_dirs}/${mvn_package_name} s3://devops-template-build-packages/${application_dirs}_${VERSION_NUMBER}.zip"
                 // echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
+
+                //read configuration from properties
+                configFileProvider([configFile(fileId: 'd2db6af6-4c8d-49a9-bd4d-2dd168eae2b3', variable: 'configfile')]){
+                    script{
+                    echo "file: $configfile "
+                    def props = readProperties file: "$configfile"
+                    def username = props['username']
+                    echo "username: $username "
+                    }
+                }
+
                     script{
 
                         // def UPLOAD_SCRIPT = '''
@@ -85,13 +112,10 @@ pipeline {
                         //     source terraform_scripts/role.sh ${USER_ID} ${JENKIN_ROLE_NAME}
                         //     aws s3 cp ${application_dirs}/${mvn_package_name} s3://${bucket}/code-package/${application_dirs}_${VERSION_NUMBER}.zip
                         //     '''
+
                         def UPLOAD_SCRIPT = '''
-                        export AWS_DEFAULT_REGION=ap-southeast-1
-                        export AWS_ACCESS_KEY_ID=ASIASYL4OVBJ7LFR45WS
-                        export AWS_SECRET_ACCESS_KEY=T27JT0DKbxYSoAJlfyN50DRuUtDsZ0BMSUjKttpU
-                        export AWS_SESSION_TOKEN=IQoJb3JpZ2luX2VjENH//////////wEaCXVzLWVhc3QtMSJHMEUCIGeiAGE+JqAjO3wVOhify4IGOzl/qPzQFbxRFpaQpl5zAiEAoyuvjgaZTbEQ9voKWqpH8RQPs4MgL/2iWaiALF6iy0AqoAIIiv//////////ARAAGgwxODk3NzY0MzkzNzkiDJsH49etyKTUwBY6Qyr0Ae6ryo5NhSUV3Ur822+h2h6F7hFC6P8uQAxvr+pyXy3Xea+eWf03onXU8d3nIUwQuGqYIrMBnXue0TvBH9Xh9yDX3yJoX8swKoZXOPWR1S0Z7LTAmxXwAjHXAtM5TkGjm6Oq6/EtRt/ipev6ehrYCyPoJ8P5fcWg4J+1BNTCo/lzWYs0Iy46hpNDN+rYe7LEGjx5QociBuavlH4i9aM4m2vJE4Ue0KvbinkRFr1iGUDmoIMQQqFOk0ybrJblS17ljtT8KfShWTNqp36L84DZeka0O15w/m1cG7hIlsnk16VJ3JCCQKA5DFnTNcHunKOEl1MHymMw1/aBhgY6nQHcZNG1dj10i8RYT8f5QLRuw8EHFxIXCPYQTH5I8oSNguAaGTXDgk5ZOjrYZnIP5uOkk0c/45cEp4JlOWR8EBCPnBeKHCUjUK+u5EwcROrChryf/12OqR8N1HuO6C+bG249OYRPb2t3blTvDMGNVuCULwFZf09ZyPp6f/IRfQw4xBEWYL1lk8FbS9FVt3588f4lgZTUm/NSIKh0y/O3
                         aws s3 ls
-                        aws s3 cp ${application_dirs}/${mvn_package_name} s3://${bucket}/code-package/${application_dirs}_${VERSION_NUMBER}.zip
+                        aws s3 cp ${APPLICATION_DIR}/${MVN_PACKAGE_NAME} s3://${AWS_S3_BUCKET_CODE_PACKAGE}/code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip
                         '''
                         sh UPLOAD_SCRIPT
                         echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
@@ -99,23 +123,19 @@ pipeline {
             }
         }
 
-
-	stage('deploy') {
-		steps{
-			configFileProvider([configFile(fileId: '63111193b-123ac-433-a910-18fa33sdf57', variable: 'role')]) {
-				script{
-					def DEPLOY_SCRIPT = '''
-							   pwd
-							   source ${role} ${USER_ID} ${JENKIN_ROLE_NAME}
-							   aws --region ${REGION} deploy create-deployment \
-							   --application-name myproject-code-deploy \
-							   --deployment-group-name ${code_deploy_group} \
-								--s3-location bucket=${bucket},key=code-package/${application_dirs}_${VERSION_NUMBER}.zip,bundleType=zip
-							   '''
-				sh DEPLOY_SCRIPT
-				}
-			}
-		}
-	}
-}
+	    stage('Deploy') {
+            steps{
+                    script{
+                        def DEPLOY_SCRIPT = '''
+                                   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
+                                   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
+                                   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
+                                   --deployment-config-name CodeDeployDefault.OneAtATime \
+                                   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
+                                   '''
+                    sh DEPLOY_SCRIPT
+                    }
+            }
+        }
+    }
 }
