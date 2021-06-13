@@ -24,15 +24,6 @@
 		<java.version>1.8</java.version>
 	</properties>
 
-	<resources>
-		<resource>
-			<directory>${basedir}/src/main/resources</directory>
-			<includes>
-				<include>*.xml</include>
-			</includes>
-		</resource>
-	</resources>
-
 	<dependencies>
 
 		<dependency>
