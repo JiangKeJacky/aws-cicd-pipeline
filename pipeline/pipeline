@@ -19,30 +19,30 @@ pipeline {
     // }
 
     environment {
-        PROJECT_NAME            = "myproject"
+        PROJECT_NAME            = "spring-test-unit"
         JENKIN_ROLE_NAME        = 'role-Deploy'
         ROOT_BACKEND_PATH       = "${WORKSPACE}"
 
         RUN_ENV                 = "prd"
         VERSION_NUMBER          = "0.0.${BUILD_NUMBER}.${RUN_ENV}"
-        MVN_PACKAGE_NAME        = "target/${application_dir}-0.0.1-SNAPSHOT.zip"
+        MVN_PACKAGE_NAME        = "target/${PROJECT_NAME}-0.0.1-SNAPSHOT.zip"
         APPLICATION_DIR         = "${PROJECT_NAME}"
 
         //GIT repository
-        GIT_REPOSITORY          = "http://root:abcd1234@ec2-54-251-170-35.ap-southeast-1.compute.amazonaws.com/root/cicd-demo.git"
+        GIT_REPOSITORY          = "http://root:abcd1234@ec2-13-229-86-131.ap-southeast-1.compute.amazonaws.com/root/devops-template-project.git"
 
         //AWS access key
-        AWS_DEFAULT_REGION      = "ap-southeast-1"
-        AWS_ACCESS_KEY_ID       = "ASIASYL4OVBJ66GDMOFM"
-        AWS_SECRET_ACCESS_KEY   = "VnG2riT1i7qY2lTKRsbna6nlMV3kNsyq1+CVUo+d"
-        AWS_SESSION_TOKEN       = "IQoJb3JpZ2luX2VjEOL//////////wEaCXVzLWVhc3QtMSJIMEYCIQD8vohR4g6bPRNQ8FicaTVdWRuSjQ6gV8lv4zzgc+jIGwIhALfdlEdrSAIE1K4aot0wv6tzkvAbEGhZ7v5gplGV3OvlKqACCJv//////////wEQABoMMTg5Nzc2NDM5Mzc5IgxNMsZbssNEiS75RYYq9AG3EcanPPQPdRYmfIP1j7Abnw/EEKbjkJmmyUjMMS9oGlAQ++s7v1t4dRubtZRHz1xhEzrd2VxJUD6yvJ8FUsh91MG88Mebxhr5skIVzEoZ5g9uWiD6FdiJrECGUHgsG6z1P+qnVB9zbYm4JYmBUeg/AY6Qn8swQUI9VWuTf9/lOo4P5a5FwwSw1QQuvJMGIpI9haVB2uiQeLhknSBT4eSPpmwhNn6vOlxnQTG6RT/Wrs6oOfj0eQX0yxUJQE1nybMebv0dgD0H/c+yBwYHp+EVKuBBM0Mf8PkU1NFndvplevHrsCpU1V2CiVaTbqSys7N2ROh5MLPThYYGOpwBaZs1nygDSx438oTXL7XyaUNqDrTutBMu2FoYiysVlue3IZJnYeh6o14+NF94mfDFbCTcYuxkYyNgpWdnneTJTBGe1/Uge2GcJY1g2ZaEowb4q6IxmagX7fF7TdtdGMQfgU/YXOG3lu/cD/FcKnvQIKcufAVdsWiPR3ZTk8btSdsynh0/flrndvFy94g0vYRVvxou4AFcxJeJfY7X"
-
+        AWS_DEFAULT_REGION="ap-southeast-1"
+        AWS_ACCESS_KEY_ID="ASIASYL4OVBJ47IRZWL3"
+        AWS_SECRET_ACCESS_KEY="XiiDswL9MHQC/NRBWMc8hKApyLafh7NHSE5Hp+zT"
+        AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjEPv//////////wEaCXVzLWVhc3QtMSJHMEUCIBIvS7Bq46dYQm4Zz7oRgrFTMeiOw2zpk8Tt84S5855eAiEAmXBwc0UCQvFJPjxxhzSW5irXLWNYdreoHR+JURAnXS0qoAIItP//////////ARAAGgwxODk3NzY0MzkzNzkiDKSj2cjeZ43nj9HbbCr0ATqZyvWTQH8hwf0TywOcTo9soE4hVHdHVqOg3rWnAXUZ8r3MIWQzH4Dkgoz/qwr9+UD0vce15a/rI4PXINunHbthUdlDhPPyeAMYUh2Sbum5LE+WvHLimiymUaJrZVeadlHM1VU/ZwuNY+dC/6VK0UR26/XpX5wSU0cMvUO5ir+h71OKB50/+UUJeHRfJitCSTOT9a6EX31XCxiIVDKN2vKP3r/RzWSpWeMnWO4nR9TeN5SKijV24xCgHRHtM5Q7MUx3yYq+sPdTyC1PB6HW1k/lJzzacdoG4qBYVc2D+DTKlEjigOWLAe5MUnYxoFzfuKMtGAswgJqLhgY6nQG8IdfZht7SWu/oZktQrU4ERtqskn2i+dqQjm7h+exxfmGAB9jPXbN9WkGbJZmIXCenVxGpNuan32ItwYFQThAVmNgP6JvgGhBDSazNF7l6cD0SwUI5DzHraICJjoT6NOriLLe4HQqb+njkCUnDYItWJqAtEgOSDUh/Cymb0I8DEuz3AxouCnZhyqcGXUXA9ML0OTRXAcYyAk41Svc3"
         //s3 bucket for store the code package, should be created before the pipeline first run
-        AWS_S3_BUCKET_CODE_PACKAGE      = "s3-code-package"
+        AWS_S3_BUCKET_CODE_PACKAGE      = "devops-template-build-packages"
 
         //initialize codedeploy for a pipeline,  should be created before the pipeline first run
         AWS_DEPLOYMENT_APPLICATION_NAME = "SpringBoot_Test"
         AWS_DEPLOYMENT_GROUP            = "SpringBoot_DepGroup"
+        PATH = "/usr/local/lib/apache-maven-3.8.1/bin:$PATH"
     }
 
     stages {
@@ -55,17 +55,17 @@ pipeline {
                 // Run Maven on a Unix agent.
                 //sh "mvn -Dmaven.test.failure.ignore=true clean package"
 
-                // //代码编译
-                // sh "mvn clean compile"
+                //代码编译
+                sh "mvn clean compile"
 
-                // //单元测试
-                // sh "mvn -Dtest=com.mgiglione.service.test.unit.UnitTests test"
+                //单元测试
+                sh "mvn -Dtest=com.mgiglione.service.test.unit.UnitTests test"
 
-                // //集成测试
-                // sh "mvn -Dtest=com.mgiglione.service.test.integration.IntegrationTests test"
+                //集成测试
+                sh "mvn -Dtest=com.mgiglione.service.test.integration.IntegrationTests test"
 
-                // //代码编译
-                // sh "mvn package"
+                //代码编译
+                sh "mvn -Dmaven.test.skip=true package"
 
                 // To run Maven on a Windows agent, use
                 // bat "mvn -Dmaven.test.failure.ignore=true clean package"
@@ -115,7 +115,7 @@ pipeline {
 
                         def UPLOAD_SCRIPT = '''
                         aws s3 ls
-                        aws s3 cp ${APPLICATION_DIR}/${MVN_PACKAGE_NAME} s3://${AWS_S3_BUCKET_CODE_PACKAGE}/code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip
+                        aws s3 cp ${MVN_PACKAGE_NAME} s3://${AWS_S3_BUCKET_CODE_PACKAGE}/code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip
                         '''
                         sh UPLOAD_SCRIPT
                         echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
@@ -124,18 +124,18 @@ pipeline {
         }
 
 	    stage('Deploy') {
-            steps{
-                    script{
-                        def DEPLOY_SCRIPT = '''
-                                   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
-                                   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
-                                   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
-                                   --deployment-config-name CodeDeployDefault.OneAtATime \
-                                   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
-                                   '''
-                    sh DEPLOY_SCRIPT
-                    }
-            }
-        }
-    }
+		steps{
+				script{
+					def DEPLOY_SCRIPT = '''
+							   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
+							   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
+							   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
+							   --deployment-config-name CodeDeployDefault.OneAtATime \
+							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
+							   '''
+				sh DEPLOY_SCRIPT
+				}
+		}
+	}
+}
 }
