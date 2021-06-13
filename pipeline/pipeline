@@ -29,13 +29,15 @@ pipeline {
         APPLICATION_DIR         = "${PROJECT_NAME}"
 
         //GIT repository
-        GIT_REPOSITORY          = "http://root:abcd1234@ec2-13-229-86-131.ap-southeast-1.compute.amazonaws.com/root/devops-template-project.git"
+        GIT_REPOSITORY          = "http://root:abcd1234@ec2-13-212-109-59.ap-southeast-1.compute.amazonaws.com/root/devops-template-project.git"
 
         //AWS access key
         AWS_DEFAULT_REGION="ap-southeast-1"
-        AWS_ACCESS_KEY_ID="ASIASYL4OVBJ47IRZWL3"
-        AWS_SECRET_ACCESS_KEY="XiiDswL9MHQC/NRBWMc8hKApyLafh7NHSE5Hp+zT"
-        AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjEPv//////////wEaCXVzLWVhc3QtMSJHMEUCIBIvS7Bq46dYQm4Zz7oRgrFTMeiOw2zpk8Tt84S5855eAiEAmXBwc0UCQvFJPjxxhzSW5irXLWNYdreoHR+JURAnXS0qoAIItP//////////ARAAGgwxODk3NzY0MzkzNzkiDKSj2cjeZ43nj9HbbCr0ATqZyvWTQH8hwf0TywOcTo9soE4hVHdHVqOg3rWnAXUZ8r3MIWQzH4Dkgoz/qwr9+UD0vce15a/rI4PXINunHbthUdlDhPPyeAMYUh2Sbum5LE+WvHLimiymUaJrZVeadlHM1VU/ZwuNY+dC/6VK0UR26/XpX5wSU0cMvUO5ir+h71OKB50/+UUJeHRfJitCSTOT9a6EX31XCxiIVDKN2vKP3r/RzWSpWeMnWO4nR9TeN5SKijV24xCgHRHtM5Q7MUx3yYq+sPdTyC1PB6HW1k/lJzzacdoG4qBYVc2D+DTKlEjigOWLAe5MUnYxoFzfuKMtGAswgJqLhgY6nQG8IdfZht7SWu/oZktQrU4ERtqskn2i+dqQjm7h+exxfmGAB9jPXbN9WkGbJZmIXCenVxGpNuan32ItwYFQThAVmNgP6JvgGhBDSazNF7l6cD0SwUI5DzHraICJjoT6NOriLLe4HQqb+njkCUnDYItWJqAtEgOSDUh/Cymb0I8DEuz3AxouCnZhyqcGXUXA9ML0OTRXAcYyAk41Svc3"
+        AWS_ACCESS_KEY_ID="ASIAQBSPDQ6TNCPJMLN4"
+        AWS_SECRET_ACCESS_KEY="eqfGoU9SQ4Sa6lKziMiABsX/i7EI24h2mv6d0aZ4"
+
+        AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjEDUaCXVzLWVhc3QtMSJHMEUCIQDJbRbUl319yDQ7kWToIY3ziQSvPMVG97KAGHJEPGlCigIgNoOm2o4uaiJIr9alSb8ZSf2+AQzAis06C3feEJnYyE0qnwII7f//////////ARAAGgwwMDMzODcxMzE4MTQiDF+/XsLywyfnG8t1ByrzAbPYbxtCD91ibdGRcXfUR89qy8xU2fBCki22zHhQUXB1y0avgrtfMLuGxs0m5I/Eb/r4GYO88KqGim1zv6fmNcLLOOKe43FnE0lTqBYxM1u6V9AQpeZJCbxCSH4bmqYIdoFK51K4BehOAnWyXWTbQcszFrskUcYtUSaCiEYtB1+/Y0RJh9ToOj2gMFGFh/a++Vv4kElRK8QSi/eHlU9hcwk8JE+FhrOgIgEGQIsuRI44FX0Ps2KKPdHNMo9IJNuqSG8zG1m5CHHTkrejkms0EoOCS+q+mFbruaY+nHZLN2odipMvMh3S+CbM/1p0rHFjB3+nxzCG65eGBjqeAZ9eg9dbPgwzkRbNwQjCDk7JaQ5FoJOs2nRpXkZCaZqwejO91pEEPgEFS2mfSq0lTPr+qC7n0YCoWuod29+tXJYCgS+57GPzXhIhNuxDbwwnxfDI+MrBM82SJ9jsta9hi37FqzpQPyRP4fJNHrEJwmUGzi9O5t1YMiCitzvFl0Xfo8yoch3FGToxuLW6dHAneGat3bSNi5xh2GKyX9mp"
+
         //s3 bucket for store the code package, should be created before the pipeline first run
         AWS_S3_BUCKET_CODE_PACKAGE      = "devops-template-build-packages"
 
@@ -94,14 +96,14 @@ pipeline {
                 // echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
 
                 //read configuration from properties
-                configFileProvider([configFile(fileId: 'd2db6af6-4c8d-49a9-bd4d-2dd168eae2b3', variable: 'configfile')]){
-                    script{
-                    echo "file: $configfile "
-                    def props = readProperties file: "$configfile"
-                    def username = props['username']
-                    echo "username: $username "
-                    }
-                }
+                // configFileProvider([configFile(fileId: 'd2db6af6-4c8d-49a9-bd4d-2dd168eae2b3', variable: 'configfile')]){
+                //     script{
+                //     echo "file: $configfile "
+                //     def props = readProperties file: "$configfile"
+                //     def username = props['username']
+                //     echo "username: $username "
+                //     }
+                // }
 
                     script{
 
