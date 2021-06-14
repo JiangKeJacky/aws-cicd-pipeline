@@ -16,9 +16,10 @@
     <fileSets>
         <!-- 从目标目录拷贝文件去压缩 -->
         <fileSet>
-            <directory>target</directory>
+            <directory>./</directory>
             <includes>
-                <include>*.jar</include>
+                <include>target/*.jar</include>
+                <include>appspec.yml</include>
             </includes>
             <outputDirectory>/</outputDirectory>
         </fileSet>
