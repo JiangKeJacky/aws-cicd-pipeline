@@ -116,7 +116,7 @@ pipeline {
 
                         def UPLOAD_SCRIPT = '''
                         aws s3 ls
-                        aws s3 cp ${MVN_PACKAGE_NAME} s3://${AWS_S3_BUCKET_CODE_PACKAGE}/code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip
+                        aws s3 cp ${MVN_PACKAGE_NAME} s3://${AWS_S3_BUCKET_CODE_PACKAGE}/${APPLICATION_DIR}_${VERSION_NUMBER}.zip
                         '''
                         sh UPLOAD_SCRIPT
                         echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
@@ -132,7 +132,7 @@ pipeline {
 							   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
 							   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
 							   --deployment-config-name CodeDeployDefault.OneAtATime \
-							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
+							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
 							   '''
 				sh DEPLOY_SCRIPT
 				}
