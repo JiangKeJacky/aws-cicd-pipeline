@@ -1,0 +1,85 @@
+pipeline {
+	agent any
+
+   	options {
+        	buildDiscarder(logRotator(numToKeepStr: '5',daysToKeepStr:'16'))
+        	timeout(time: 30, unit: 'MINUTES')
+    	}
+
+    // parameters {
+
+    //     string(name: 'GIT_REPO', defaultValue: 'https://test.com/scm/myproject.git', description: '')
+    //     choice(choices: ['YES','NO'], description: 'default to YES', name: 'DeployFlag')
+    //     choice(choices: ['cn-east-1','cn-west-2'], description: '', name: 'REGION')
+    //     choice(choices: ['111011193316', '2222215333393'], description: '', name: 'USER_ID')
+
+    //     choice(choices: ['dev', 'qa', 'prd'], description: '', name: 'RUN_ENV')
+
+
+    // }
+
+    environment {
+        PROJECT_NAME            = "spring-test-unit"
+        JENKIN_ROLE_NAME        = 'role-Deploy'
+        ROOT_BACKEND_PATH       = "${WORKSPACE}"
+
+        RUN_ENV                 = "prd"
+        VERSION_NUMBER          = "0.0.${BUILD_NUMBER}.${RUN_ENV}"
+        MVN_PACKAGE_NAME        = "target/${PROJECT_NAME}-0.0.1-SNAPSHOT.zip"
+        APPLICATION_DIR         = "${PROJECT_NAME}"
+
+        //GIT repository
+        GIT_REPOSITORY          = "http://root:abcd1234@ec2-13-212-109-59.ap-southeast-1.compute.amazonaws.com/root/devops-template-project.git"
+
+
+        //s3 bucket for store the code package, should be created before the pipeline first run
+        AWS_S3_BUCKET_CODE_PACKAGE      = "devops-template-build-packages"
+        AWS_S3_BUCKET_SOURCE_PACKAGE      = "devops-template-source-packages"
+
+        //initialize codedeploy for a pipeline,  should be created before the pipeline first run
+        AWS_DEPLOYMENT_APPLICATION_NAME = "SpringBoot_Test"
+        AWS_DEPLOYMENT_GROUP            = "SpringBoot_DepGroup"
+        PATH = "/usr/local/lib/apache-maven-3.8.1/bin:$PATH"
+    }
+
+    stages {
+
+        stage('SourceToS3') {
+            steps{
+                git "${GIT_REPOSITORY}"
+                sh "zip -r source.zip ./*"
+                script{
+
+                    def UPLOAD_SCRIPT = '''
+                        aws s3 ls
+                        aws s3 cp source.zip s3://${AWS_S3_BUCKET_SOURCE_PACKAGE}/code-package/source.zip
+                    '''
+                    sh UPLOAD_SCRIPT
+                }
+
+            }
+
+        }
+
+        stage('Build') {
+            steps {
+                sh "aws codebuild start-build --project-name ${PROJECT_NAME}"
+            }
+        }
+
+	    stage('Deploy') {
+		steps{
+				script{
+					def DEPLOY_SCRIPT = '''
+							   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
+							   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
+							   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
+							   --deployment-config-name CodeDeployDefault.OneAtATime \
+							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=code-package/${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
+							   '''
+				sh DEPLOY_SCRIPT
+				}
+		}
+	}
+}
+}
