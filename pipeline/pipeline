@@ -29,7 +29,7 @@ pipeline {
         APPLICATION_DIR         = "${PROJECT_NAME}"
 
         //GIT repository
-        GIT_REPOSITORY          = "http://root:abcd1234@ec2-13-212-109-59.ap-southeast-1.compute.amazonaws.com/root/devops-template-project.git"
+        GIT_REPOSITORY          = "http://root:abcd1234@ec2-13-212-219-45.ap-southeast-1.compute.amazonaws.com/root/devops-template-project.git"
 
         //AWS access key
         AWS_DEFAULT_REGION="ap-southeast-1"
@@ -40,10 +40,14 @@ pipeline {
         //s3 bucket for store the code package, should be created before the pipeline first run
         AWS_S3_BUCKET_CODE_PACKAGE      = "devops-template-build-packages"
 
-        //initialize codedeploy for a pipeline,  should be created before the pipeline first run
+        //initialize codedeploy for a pipeline should be done before the pipeline first run
         AWS_DEPLOYMENT_APPLICATION_NAME = "SpringBoot_Test"
         AWS_DEPLOYMENT_GROUP            = "SpringBoot_DepGroup"
         PATH = "/usr/local/lib/apache-maven-3.8.1/bin:$PATH"
+
+        //setting for sonar
+        SONAR_SERVER = "http://localhost:9000"
+        SONAR_TOKEN = "357624e5387e4c3bf7d668fbb3d991d388600e19"
     }
 
     stages {
@@ -52,6 +56,8 @@ pipeline {
             steps {
                 // Get some code from a GitHub repository
                 git "${GIT_REPOSITORY}"
+
+                sh "mvn clean verify sonar:sonar  -Dsonar.host.url=${SONAR_SERVER} -Dsonar.login=${SONAR_TOKEN} -Pcoverage"
 
                 // Run Maven on a Unix agent.
                 //sh "mvn -Dmaven.test.failure.ignore=true clean package"
