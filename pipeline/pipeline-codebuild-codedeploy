@@ -40,13 +40,24 @@ pipeline {
         AWS_DEPLOYMENT_APPLICATION_NAME = "SpringBoot_Test"
         AWS_DEPLOYMENT_GROUP            = "SpringBoot_DepGroup"
         PATH = "/usr/local/lib/apache-maven-3.8.1/bin:$PATH"
+
+        //setting for sonar
+        SONAR_SERVER = "http://localhost:9000"
+        SONAR_TOKEN = "357624e5387e4c3bf7d668fbb3d991d388600e19"
+
     }
 
     stages {
 
-        stage('SourceToS3') {
+        stage('SourceScan') {
             steps{
                 git "${GIT_REPOSITORY}"
+                sh "mvn clean verify sonar:sonar  -Dsonar.host.url=${SONAR_SERVER} -Dsonar.login=${SONAR_TOKEN} -Pcoverage"
+            }
+        }
+
+        stage('SourceToS3') {
+            steps{
                 sh "zip -r source.zip ./*"
                 script{
 
