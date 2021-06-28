@@ -6,6 +6,7 @@
 
 # Ctrl-C 直接退出整个脚本
 
+
 echo '[INFO] Checking root permission...'
 
 [ $(id -u) -eq '0' ] || {
@@ -15,7 +16,6 @@ echo '[INFO] Checking root permission...'
 
 echo '[INFO] Install python...'
 yum install -y python3
-
 echo '[INFO] Install awscli...'
 python3 -m pip install awscli
 ln -s /usr/local/bin/aws /usr/bin
@@ -26,6 +26,9 @@ yum install -y java-devel
 
 echo '[INFO] Install git...'
 yum install -y git
+
+echo '[INFO] Install docker...'
+yum install -y docker
 
 echo '[INFO] Install maven...'
 wget https://mirror.olnevhost.net/pub/apache/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz
