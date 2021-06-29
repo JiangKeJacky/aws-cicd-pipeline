@@ -20,6 +20,7 @@
             <includes>
                 <include>target/*.jar</include>
                 <include>appspec.yml</include>
+                <include>scripts/*</include>
             </includes>
             <outputDirectory>/</outputDirectory>
         </fileSet>
