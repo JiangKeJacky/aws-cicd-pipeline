@@ -5,4 +5,4 @@ aws deploy create-deployment-group \
   --deployment-group-name SpringBoot_DepGroup \
   --deployment-config-name CodeDeployDefault.OneAtATime \
   --ec2-tag-filters Key=Name,Value=CodeDeployDemo,Type=KEY_AND_VALUE \
-  --service-role-arn arn:aws:iam::300835872711:role/CodeDeployServiceRole
+  --service-role-arn arn:aws:iam::344336018550:role/CodeDeployServiceRole

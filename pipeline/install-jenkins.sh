@@ -14,6 +14,8 @@ echo '[INFO] Checking root permission...'
   exit 1;
 }
 
+yum update
+
 echo '[INFO] Install python...'
 yum install -y python3
 echo '[INFO] Install awscli...'

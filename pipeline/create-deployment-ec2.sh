@@ -15,8 +15,8 @@ aws ec2 authorize-security-group-ingress \
 aws autoscaling create-launch-configuration \
   --launch-configuration-name CodeDeployDemo-AS-Configuration \
   --image-id ami-0e8e39877665a7c92 \
-  --key-name EC2-test \
-  --security-groups sg-05e8be886dbfe191d \
+  --key-name ee-default-keypair \
+  --security-groups sg-0638612b576bc03aa \
   --iam-instance-profile CodeDeployDemo-EC2-Instance-Profile \
   --instance-type t3.small
 
@@ -24,10 +24,10 @@ aws autoscaling create-launch-configuration \
 aws autoscaling create-auto-scaling-group \
   --auto-scaling-group-name CodeDeployDemo-AS-Group \
   --launch-configuration-name CodeDeployDemo-AS-Configuration \
-  --min-size 1 \
-  --max-size 2 \
-  --desired-capacity 2 \
-  --vpc-zone-identifier "subnet-9a35d3d2,subnet-38248961" \
+  --min-size 3 \
+  --max-size 3 \
+  --desired-capacity 3 \
+  --vpc-zone-identifier "subnet-8be14dc3,subnet-17ac1071" \
   --tags Key=Name,Value=CodeDeployDemo,PropagateAtLaunch=true
 
 aws ssm create-association \
