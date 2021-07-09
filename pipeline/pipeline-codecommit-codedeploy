@@ -1,0 +1,143 @@
+pipeline {
+	agent any
+
+   	options {
+        	buildDiscarder(logRotator(numToKeepStr: '5',daysToKeepStr:'16'))
+        	timeout(time: 30, unit: 'MINUTES')
+    	}
+
+    // parameters {
+
+    //     string(name: 'GIT_REPO', defaultValue: 'https://test.com/scm/myproject.git', description: '')
+    //     choice(choices: ['YES','NO'], description: 'default to YES', name: 'DeployFlag')
+    //     choice(choices: ['cn-east-1','cn-west-2'], description: '', name: 'REGION')
+    //     choice(choices: ['111011193316', '2222215333393'], description: '', name: 'USER_ID')
+
+    //     choice(choices: ['dev', 'qa', 'prd'], description: '', name: 'RUN_ENV')
+
+
+    // }
+
+    environment {
+        PROJECT_NAME            = "spring-test-unit"
+        JENKIN_ROLE_NAME        = 'role-Deploy'
+        ROOT_BACKEND_PATH       = "${WORKSPACE}"
+
+        RUN_ENV                 = "prd"
+        VERSION_NUMBER          = "0.0.${BUILD_NUMBER}.${RUN_ENV}"
+        MVN_PACKAGE_NAME        = "target/${PROJECT_NAME}-0.0.1-SNAPSHOT.zip"
+        APPLICATION_DIR         = "${PROJECT_NAME}"
+
+        //GIT repository
+        GIT_REPOSITORY = "https://git-codecommit.ap-southeast-1.amazonaws.com/v1/repos/devops-template-project.git"
+
+        //AWS access key
+        AWS_DEFAULT_REGION="ap-southeast-1"
+        //AWS_ACCESS_KEY_ID="ASIAQBSPDQ6TNCPJMLN4"
+        //AWS_SECRET_ACCESS_KEY="eqfGoU9SQ4Sa6lKziMiABsX/i7EI24h2mv6d0aZ4"
+        //AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjEDUaCXVzLWVhc3QtMSJHMEUCIQDJbRbUl319yDQ7kWToIY3ziQSvPMVG97KAGHJEPGlCigIgNoOm2o4uaiJIr9alSb8ZSf2+AQzAis06C3feEJnYyE0qnwII7f//////////ARAAGgwwMDMzODcxMzE4MTQiDF+/XsLywyfnG8t1ByrzAbPYbxtCD91ibdGRcXfUR89qy8xU2fBCki22zHhQUXB1y0avgrtfMLuGxs0m5I/Eb/r4GYO88KqGim1zv6fmNcLLOOKe43FnE0lTqBYxM1u6V9AQpeZJCbxCSH4bmqYIdoFK51K4BehOAnWyXWTbQcszFrskUcYtUSaCiEYtB1+/Y0RJh9ToOj2gMFGFh/a++Vv4kElRK8QSi/eHlU9hcwk8JE+FhrOgIgEGQIsuRI44FX0Ps2KKPdHNMo9IJNuqSG8zG1m5CHHTkrejkms0EoOCS+q+mFbruaY+nHZLN2odipMvMh3S+CbM/1p0rHFjB3+nxzCG65eGBjqeAZ9eg9dbPgwzkRbNwQjCDk7JaQ5FoJOs2nRpXkZCaZqwejO91pEEPgEFS2mfSq0lTPr+qC7n0YCoWuod29+tXJYCgS+57GPzXhIhNuxDbwwnxfDI+MrBM82SJ9jsta9hi37FqzpQPyRP4fJNHrEJwmUGzi9O5t1YMiCitzvFl0Xfo8yoch3FGToxuLW6dHAneGat3bSNi5xh2GKyX9mp"
+
+        //s3 bucket for store the code package, should be created before the pipeline first run
+        AWS_S3_BUCKET_CODE_PACKAGE      = "devops-template-build-packages"
+
+        //initialize codedeploy for a pipeline should be done before the pipeline first run
+        AWS_DEPLOYMENT_APPLICATION_NAME = "SpringBoot_Test"
+        AWS_DEPLOYMENT_GROUP            = "SpringBoot_DepGroup"
+        PATH = "/usr/local/lib/apache-maven-3.8.1/bin:$PATH"
+
+        //setting for sonar
+        SONAR_SERVER = "http://localhost:9000"
+        SONAR_TOKEN = "75aed2ea890820dfb4d258b1a4e3ede49ec7c743"
+    }
+
+    stages {
+
+        stage('PullSource') {
+            steps {
+                //git "${GIT_REPOSITORY}"
+                git credentialsId: 'codecommit-user', url: "${GIT_REPOSITORY}"
+            }
+        }
+
+        stage('SourceScan'){
+            steps{
+                sh "mvn clean verify sonar:sonar  -Dsonar.host.url=${SONAR_SERVER} -Dsonar.login=${SONAR_TOKEN} -Pcoverage"
+            }
+        }
+
+        stage('Compile') {
+            steps {
+                //代码编译
+                sh "mvn clean compile"
+            }
+        }
+
+        stage('UnitTest') {
+            steps {
+                //单元测试
+                sh "mvn -Dtest=com.mgiglione.service.test.unit.UnitTests test"
+
+            }
+        }
+
+        stage('IntegrationTest') {
+            steps {
+                //集成测试
+                sh "mvn -Dtest=com.mgiglione.service.test.integration.IntegrationTests test"
+            }
+
+        }
+
+        stage('Package') {
+            steps {
+                //代码打包
+                sh "mvn -Dmaven.test.skip=true package"
+
+            }
+
+            // post {
+            //     // If Maven was able to run the tests, even if some of the test
+            //     // failed, record the test results and archive the jar file.
+            //     success {
+            //         //junit '**/target/surefire-reports/TEST-*.xml'
+            //         //archiveArtifacts 'target/*.jar'
+            //     }
+            // }
+        }
+
+        stage('PackageToS3' ) {
+	    //是否部署判断，参数化
+	    // when {
+        //         environment ignoreCase: true, name: 'DeployFlag', value: 'YES'
+        //         beforeAgent true
+        //     }
+            steps{
+
+                    script{
+
+                        def UPLOAD_SCRIPT = '''
+                        aws s3 ls
+                        aws s3 cp ${MVN_PACKAGE_NAME} s3://${AWS_S3_BUCKET_CODE_PACKAGE}/${APPLICATION_DIR}_${VERSION_NUMBER}.zip
+                        '''
+                        sh UPLOAD_SCRIPT
+                        echo "VERSION_NUMBER:  ${VERSION_NUMBER}"
+                    }
+            }
+        }
+
+	    stage('Deploy') {
+            steps{
+                    script{
+                        def DEPLOY_SCRIPT = '''
+                                   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
+                                   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
+                                   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
+                                   --deployment-config-name CodeDeployDefault.OneAtATime \
+                                   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
+                                   '''
+                    sh DEPLOY_SCRIPT
+                    }
+            }
+        }
+    }
+}
