@@ -1,3 +1,5 @@
+import groovy.json.JsonSlurper
+
 pipeline {
 	agent any
 
@@ -48,6 +50,8 @@ pipeline {
         //setting for sonar
         SONAR_SERVER = "http://localhost:9000"
         SONAR_TOKEN = "75aed2ea890820dfb4d258b1a4e3ede49ec7c743"
+
+        DEPLOY_ID = ""
     }
 
     stages {
@@ -126,18 +130,49 @@ pipeline {
         }
 
 	    stage('Deploy') {
-            steps{
-                    script{
-                        def DEPLOY_SCRIPT = '''
-                                   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
-                                   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
-                                   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
-                                   --deployment-config-name CodeDeployDefault.OneAtATime \
-                                   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
-                                   '''
-                    sh DEPLOY_SCRIPT
+		    steps{
+				script{
+
+					def DEPLOY_SCRIPT = '''
+							   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
+							   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
+							   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
+							   --deployment-config-name CodeDeployDefault.OneAtATime \
+							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=${APPLICATION_DIR}_0.0.6.prd.zip,bundleType=zip
+							   '''
+				  result = sh returnStdout: true, script: DEPLOY_SCRIPT
+				  result = result.trim()
+				  echo result
+				  def deployment = new JsonSlurper().parseText(result)
+				  if (deployment == null) error 'Deploy fail'
+				  DEPLOY_ID =  deployment.deploymentId
+				    //result = sh returnStdout: true, script: DEPLOY_STATUS
+				  echo DEPLOY_ID
+				  if (DEPLOY_ID == null || DEPLOY_ID == "") error 'Deploy fail'
+				}
+
+				timeout(2) {
+    				waitUntil {
+        				script {
+        				    def DEPLOY_STATUS = '''aws deploy get-deployment --deployment-id '''.concat("${DEPLOY_ID}").concat(''' --query "deploymentInfo.status" --output text ''')
+        				    //sh DEPLOY_STATUS
+        				    result = sh returnStdout: true, script: DEPLOY_STATUS
+        				    echo "Deploy status: " + result
+        				    if (result.trim().contains("Failed")) {
+        				        error 'Deployment failed'
+        				        return true
+        				    }
+        				    if (result.trim().contains("Succeeded")) {
+        				        echo "Deployment succeeded"
+        				        return true
+        				    }
+
+        				    return false
+        				}
+
                     }
-            }
-        }
-    }
+    		    }
+		    }
+	    }
+	}
 }
