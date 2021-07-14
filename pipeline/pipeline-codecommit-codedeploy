@@ -138,7 +138,7 @@ pipeline {
 							   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
 							   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
 							   --deployment-config-name CodeDeployDefault.OneAtATime \
-							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=${APPLICATION_DIR}_0.0.6.prd.zip,bundleType=zip
+							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
 							   '''
 				  result = sh returnStdout: true, script: DEPLOY_SCRIPT
 				  result = result.trim()
