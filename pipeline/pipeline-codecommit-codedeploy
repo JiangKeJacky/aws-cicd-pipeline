@@ -49,7 +49,7 @@ pipeline {
 
         //setting for sonar
         SONAR_SERVER = "http://localhost:9000"
-        SONAR_TOKEN = "75aed2ea890820dfb4d258b1a4e3ede49ec7c743"
+        SONAR_TOKEN = "d4c1d7d45ac038ccfcee734f1c20c9ef43a5d535"
 
         DEPLOY_ID = ""
     }
@@ -174,5 +174,18 @@ pipeline {
     		    }
 		    }
 	    }
+
+	    stage('AutomaticTest') {
+            steps {
+                sleep 5
+                script{
+                    def TEST_SCRIPT = '''
+                        cd /home/jenkins
+                        python3 -m robot --outputdir results robot/ACT.robot
+                    '''
+                    sh TEST_SCRIPT
+                }
+            }
+        }
 	}
 }
