@@ -9,14 +9,14 @@ aws ec2 authorize-security-group-ingress \
 aws ec2 authorize-security-group-ingress \
     --group-name CodeDeployDemo-SG \
     --protocol tcp \
-    --port 80 \
+    --port 8080 \
     --cidr 0.0.0.0/0
 
 aws autoscaling create-launch-configuration \
   --launch-configuration-name CodeDeployDemo-AS-Configuration \
   --image-id ami-0e8e39877665a7c92 \
   --key-name ee-default-keypair \
-  --security-groups sg-0638612b576bc03aa \
+  --security-groups sg-091bc75d80da4e4ce \
   --iam-instance-profile CodeDeployDemo-EC2-Instance-Profile \
   --instance-type t3.small
 
@@ -27,7 +27,7 @@ aws autoscaling create-auto-scaling-group \
   --min-size 3 \
   --max-size 3 \
   --desired-capacity 3 \
-  --vpc-zone-identifier "subnet-8be14dc3,subnet-17ac1071" \
+  --vpc-zone-identifier "subnet-4c369904,subnet-dbc2a882" \
   --tags Key=Name,Value=CodeDeployDemo,PropagateAtLaunch=true
 
 aws ssm create-association \
