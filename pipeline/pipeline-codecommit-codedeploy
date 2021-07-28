@@ -188,4 +188,24 @@ pipeline {
             }
         }
 	}
+
+	post {
+	    success {
+            emailext(to: 'kejian@amazon.com',
+                subject: '[CICD] ${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!',
+                body: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!. Check console output at ${BUILD_URL} to view the results.',
+                compressLog: true, attachLog: true,
+                attachmentsPattern: 'report.html')
+	        //mail body: 'Jenkins Pipeline Build #${env.BUILD_NUMBER} Finished. Check console output at $BUILD_URL to view the results.', from: 'kejian@amazon.com', replyTo: 'kejian@amazon.com', subject: 'mail ${env.PROJECT_NAME - Build # ${env.BUILD_NUMBER} - ${env.BUILD_STATUS}!', to: 'kejian@amazon.com'
+
+	    }
+	    failure {
+            emailext(to: 'kejian@amazon.com',
+                subject: '[CICD] ${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!',
+                body: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!. Check console output at ${BUILD_URL} to view the results.',
+                compressLog: true, attachLog: true,
+                attachmentsPattern: 'report.html')
+	    }
+	}
+
 }
