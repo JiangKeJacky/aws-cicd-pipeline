@@ -1,3 +1,4 @@
+
 aws deploy create-application --application-name SpringBoot_Test
 
 aws deploy create-deployment-group \
@@ -5,4 +6,4 @@ aws deploy create-deployment-group \
   --deployment-group-name SpringBoot_DepGroup \
   --deployment-config-name CodeDeployDefault.OneAtATime \
   --ec2-tag-filters Key=Name,Value=CodeDeployDemo,Type=KEY_AND_VALUE \
-  --service-role-arn arn:aws:iam::897215142774:role/CodeDeployServiceRole
+  --service-role-arn arn:aws:iam::899428024842:role/CodeDeployServiceRole

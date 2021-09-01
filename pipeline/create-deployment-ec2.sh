@@ -16,7 +16,7 @@ aws autoscaling create-launch-configuration \
   --launch-configuration-name CodeDeployDemo-AS-Configuration \
   --image-id ami-0e8e39877665a7c92 \
   --key-name ee-default-keypair \
-  --security-groups sg-0d058020e80c142b9 \
+  --security-groups sg-0b9496ca3039fbb4d \
   --iam-instance-profile CodeDeployDemo-EC2-Instance-Profile \
   --instance-type t3.small
 
@@ -27,7 +27,7 @@ aws autoscaling create-auto-scaling-group \
   --min-size 3 \
   --max-size 3 \
   --desired-capacity 3 \
-  --vpc-zone-identifier "subnet-60f75928,subnet-4c215415" \
+  --vpc-zone-identifier "subnet-3553f87d,subnet-9812a9fe" \
   --tags Key=Name,Value=CodeDeployDemo,PropagateAtLaunch=true
 
 aws ssm create-association \
