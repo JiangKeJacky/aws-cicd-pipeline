@@ -40,7 +40,7 @@
 
 • 点击项目的左侧菜单 Setting->Webhook
 
-输入 jenkins pipe 的 URL 及 token，选择 push、tag 等触发事件，添加 webhook，并测试出发 jinkens 成功。
+输入 jenkins pipe 的 URL 及 token，选择 push、tag 等触发事件，添加 webhook，并测试触发jinkens 成功。
 
 ## 创建 Jenkins
 
