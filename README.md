@@ -91,22 +91,16 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 • 确保本地已安装 aws cli 及配置 aws 用户环境变量
 
 • 在本地命令行中运行创建 IAM 角色和策略，将 create-codedeploy-project.sh 中的 arn:aws:iam::300835872711:role/CodeDeployServiceRole 的 300835872711 修改为自己的 aws 账号，执行脚本 create-codedeploy-role.sh 和 create-codedeploy-project.sh
-创建部署服务器
-（如果已有可运行应用的服务器，并且已经安装了 CodeDeploy agent，此步骤可以略过）
 
-• 打开亚马逊云科技管理控制台，启动 EC2 新实例
+## 创建部署服务器
 
-• 选择 Amazon Linux 2 AMI
+（如果已有可运行应用的服务器，并且已经安装了CodeDeploy agent，此步骤可以略过）
 
-• 选择自动分配公网 IP
+•	一条命令一条命令执行create-deployment-ec2.sh, 注意修改安全组id（security-groups）新建的安全组id以及子网id(subnet-id)，将自动创建3个台EC2服务器
 
-• 安全组入口开放 22，80 端口，22 端口用于远程 SSL 连接，80 端口用于应用访问
+## 修改自动测试robot配置
 
-• IAM 角色选择上一步创建好的 CodeDeployDemo-EC2-Instance-Profile
-
-• 标签设置：键 Name，值 CodeDeployDemo
-
-• SSL 登录 EC2 服务器，安装 CodeDeploy 代理，执行脚本 install-codedeploy-agent.sh
+•	SSL登陆jenkins服务器，编辑/home/jenkins/robot/ATC.robot，其中修改Library REST的URL路径为以上应用访问路径.
 
 ## 运行使用
 
