@@ -1,3 +1,8 @@
+## 文档说明
+
+pipeline文件包含构建pipeline环境执行脚本和代码
+spring-test是一个包含单元测试、部署规范、部署脚本的spring工程脚手架，用户可根据需要在脚手架的基础上构建工程。
+
 ## 部署前提
 
 确保您部署所在区域 Amazon S3 中不包含 devops-template-source-packages 和 devops-template-build-packages。
