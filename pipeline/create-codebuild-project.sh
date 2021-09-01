@@ -1,1 +1,0 @@
-aws codebuild create-project --cli-input-json file://create-codebuild-project.json
