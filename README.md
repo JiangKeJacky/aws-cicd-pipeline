@@ -9,7 +9,7 @@
 
 ## 配置 CodeCommit 服务
 
-创建存储库（如果有则略过此步骤）
+### 创建存储库（如果有则略过此步骤）
 
 • 打开亚马逊云科技管理控制台，进入 CodeCommit
 
@@ -20,7 +20,8 @@
 • 输入存储库名字，及其他可选配置，点击创建
 
 • 配置访问该存储库的用户，记住用户和密码，参考https://docs.aws.amazon.com/zh_cn/codecommit/latest/userguide/setting-up-gc.html?icmpid=docs_acc_console_connect_np
-创建 Gitlab 服务器
+
+### 创建 Gitlab 服务器
 （如果已有 Gitlab，此步骤可以略过）
 
 • 打开亚马逊云科技管理控制台，启动 EC2 新实例
