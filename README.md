@@ -1,13 +1,13 @@
-**部署前提**
+#部署前提
 
 确保您部署所在区域 Amazon S3 中不包含 devops-template-source-packages 和 devops-template-build-packages。
 
 
-**快速部署**
+#快速部署
 
 本文涉及的代码管理CodeCommit 和 Gitlab 服务可以二选一，根据需要选择，对应的 pipeline 脚本分别为：pipeline-codecommit-codedeploy 和 pipeline
 
-**配置 CodeCommit 服务**
+#配置 CodeCommit 服务
 
 创建存储库（如果有则略过此步骤）
 
@@ -41,7 +41,7 @@
 
 输入 jenkins pipe 的 URL 及 token，选择 push、tag 等触发事件，添加 webhook，并测试出发 jinkens 成功。
 
-**创建 Jenkins**
+#创建 Jenkins
 
 • 通过共享获取 Jenkins-Sonar 的 AMI 镜像
 
@@ -79,7 +79,7 @@
 修改 pipeline 脚本的参数，包括 GIT_REPOSITORY、AWS_DEFAULT_REGION、AWS_S3_BUCKET_CODE_PACKAGE、SONAR_TOKEN，保存该 pipeline。
 如果是使用 codecommit 的 pipeline，勾选 poll scm,并设置 schedule 为*/1 * \* \* \*，即每分钟轮询一次变化。
 
-**配置 CodeDeploy 服务**
+#配置 CodeDeploy 服务
 
 • 确保本地已安装 aws cli 及配置 aws 用户环境变量
 
@@ -101,7 +101,7 @@
 
 • SSL 登录 EC2 服务器，安装 CodeDeploy 代理，执行脚本 install-codedeploy-agent.sh
 
-**运行使用**
+#运行使用
 
 修改提交项目的代码，提交到 Gitlab，将触发 Jenkins 的 CICD pipeline，可以在 Jenkins 中查看 CICD 进度
 
