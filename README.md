@@ -6,9 +6,9 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ## 部署前提
 
-确保您部署所在区域 Amazon S3 中不包含 devops-template-source-packages 和 devops-template-build-packages。
-
 pipeline文件夹下载到本地
+
+确保您部署所在区域 Amazon S3 中不包含 devops-template-source-packages 和 devops-template-build-packages。
 
 ## 快速部署
 
