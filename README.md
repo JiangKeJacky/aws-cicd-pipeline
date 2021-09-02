@@ -6,13 +6,13 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ## 部署指南
 
-本文涉及的代码管理CodeCommit 和 Gitlab 服务可以二选一，根据需要选择，对应的 pipeline 脚本分别为：pipeline-codecommit-codedeploy 和 pipeline
+本文涉及的代码管理CodeCommit 和 Gitlab 服务可以二选一，根据需要选择，对应的 pipeline 分别为：pipeline-codecommit-codedeploy 和 pipeline
 
 ### 1. 部署准备
 
-pipeline文件夹下载到本地
+git clone https://github.com/JiangKeJacky/aws-cicd-pipeline.git, 将pipeline及脚手架工程下载到本地
 
-确保您部署所在区域 Amazon S3 中不包含 devops-template-source-packages 和 devops-template-build-packages。
+部署所在区域 Amazon S3 中创建devops-template-build-packages存储桶用于存放编译后的包。
 
 
 ### 2. 配置 CodeCommit 服务
