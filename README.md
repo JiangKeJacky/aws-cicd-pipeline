@@ -10,6 +10,8 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ### 1. 部署准备
 
+确保本地已安装aws cli及配置aws用户凭证的环境变量
+
 本地开发环境下载安装git，http://git-scm.com/downloads
 
 在本地开发环境或Cloud9的终端命令行执行以下命令，将pipeline及脚手架工程下载到本地： 
@@ -99,15 +101,53 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ### 4. 配置 CodeDeploy 服务
 
-• 确保本地已安装 aws cli 及配置 aws 用户环境变量
+• 在本地命终端令行或Cloud9中运行创建IAM角色和策略，将create-codedeploy-project.sh中的 arn:aws:iam::300835872711:role/CodeDeployServiceRole 的 300835872711 修改为自己的 aws 账号，执行脚本： 
 
-• 在本地命令行中运行创建 IAM 角色和策略，将 create-codedeploy-project.sh 中的 arn:aws:iam::300835872711:role/CodeDeployServiceRole 的 300835872711 修改为自己的 aws 账号，执行脚本 create-codedeploy-role.sh 和 create-codedeploy-project.sh
+    ./create-codedeploy-role.sh
+    ./create-codedeploy-project.sh
 
 ### 5. 创建部署服务器
 
 （如果已有可运行应用的服务器，并且已经安装了CodeDeploy agent，此步骤可以略过）
 
 •	一条命令一条命令执行create-deployment-ec2.sh, 注意修改安全组id（security-groups）新建的安全组id以及子网id(subnet-id)，将自动创建3个台EC2服务器
+
+    aws ec2 create-security-group --group-name CodeDeployDemo-SG --description "CodeDeployDemo test security group"
+
+    aws ec2 authorize-security-group-ingress \
+    --group-name CodeDeployDemo-SG \
+    --protocol tcp \
+    --port 22 \
+    --cidr 0.0.0.0/0
+
+    aws ec2 authorize-security-group-ingress \
+    --group-name CodeDeployDemo-SG \
+    --protocol tcp \
+    --port 8080 \
+    --cidr 0.0.0.0/0
+
+    aws autoscaling create-launch-configuration \
+    --launch-configuration-name CodeDeployDemo-AS-Configuration \
+    --image-id ami-0e8e39877665a7c92 \
+    --key-name ee-default-keypair \
+    --security-groups <sg-0b9496ca3039fbb4d> \
+    --iam-instance-profile CodeDeployDemo-EC2-Instance-Profile \
+    --instance-type t3.small
+
+    aws autoscaling create-auto-scaling-group \
+    --auto-scaling-group-name CodeDeployDemo-AS-Group \
+    --launch-configuration-name CodeDeployDemo-AS-Configuration \
+    --min-size 3 \
+    --max-size 3 \
+    --desired-capacity 3 \
+    --vpc-zone-identifier "<subnet-3553f87d>,<subnet-9812a9fe>" \
+    --tags Key=Name,Value=CodeDeployDemo,PropagateAtLaunch=true
+
+    aws ssm create-association \
+    --name AWS-ConfigureAWSPackage \
+    --targets Key=tag:Name,Values=CodeDeployDemo \
+    --parameters action=Install,name=AWSCodeDeployAgent \
+    --schedule-expression "cron(0 2 ? * SUN *)"
 
 ### 6. 配置自动测试robot
 
