@@ -111,7 +111,7 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 （如果已有可运行应用的服务器，并且已经安装了CodeDeploy agent，此步骤可以略过）
 
-•	一条命令一条命令执行create-deployment-ec2.sh, 注意修改安全组id**<security-groups>**新建的安全组id以及子网id**<subnet-id>**，将自动创建3个台EC2服务器
+•	一条命令一条命令执行create-deployment-ec2.sh, 注意修改安全组id **<security-groups>** 新建的安全组id以及子网id **<subnet-id>**，将自动创建3个台EC2服务器
 
     aws ec2 create-security-group --group-name CodeDeployDemo-SG --description "CodeDeployDemo test security group"
 
@@ -152,7 +152,7 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ### 6. 配置自动测试robot
 
-•	SSL登陆jenkins服务器，编辑/home/jenkins/robot/ATC.robot，其中修改Library REST的URL路径为以上应用访问路径.
+•	SSH登陆jenkins服务器，编辑/home/jenkins/robot/ATC.robot，其中修改Library REST的URL路径为以上应用访问路径.
 
 ## 运行使用
 
