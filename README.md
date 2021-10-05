@@ -115,7 +115,7 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ### 6. 配置自动测试robot
 
-•	SSH登陆jenkins服务器，编辑/home/jenkins/robot/ATC.robot，其中修改Library REST的URL路径为以上应用访问路径.
+•	SSH登陆jenkins服务器，编辑/home/jenkins/robot/ACT.robot，其中修改Library REST的URL路径为以上应用访问路径.
 
 ## 运行使用
 
