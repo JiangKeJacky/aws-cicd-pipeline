@@ -10,26 +10,36 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ### 1. 部署准备
 
-git clone https://github.com/JiangKeJacky/aws-cicd-pipeline.git, 将pipeline及脚手架工程下载到本地
+本地开发环境下载安装git，http://git-scm.com/downloads
 
-部署所在区域 Amazon S3 中创建devops-template-build-packages存储桶用于存放编译后的包。
+在本地开发环境或Cloud9的终端命令行执行以下命令，将pipeline及脚手架工程下载到本地： 
+    
+    git clone https://github.com/JiangKeJacky/aws-cicd-pipeline.git
+
+部署所在区域 Amazon S3 中创建devops-template-build-packages-<560853892495>存储桶用于存放编译后的包,<560853892495>替换为aws账户id。
 
 
 ### 2. 配置 CodeCommit 服务
 
 #### 创建CodeCommit存储库（如果有则略过此步骤）
 
-• 打开亚马逊云科技管理控制台，进入 CodeCommit
+• 打开亚马逊云科技管理控制台，进入CodeCommit
 
-• 选择右边菜单栏存储库
+• 选择右边菜单栏存储库,点击创建存储库,输入存储库名字，及其他可选配置，点击创建
 
-• 点击创建存储库
+• 创建访问该存储库的用户，在IAM中创建一个选择AWSCommitPowerUser托管策略，在用户的安全证书设置页面中生成AWSCodeCommit的HTTPS Git凭证，记住用户和密码。详细参考 https://docs.aws.amazon.com/zh_cn/codecommit/latest/userguide/setting-up-gc.html?icmpid=docs_acc_console_connect_np
 
-• 输入存储库名字，及其他可选配置，点击创建
+• 在开发环境中，上传spring-test脚手架工程到新创建的CodeCommit存储库,命令行如下：
 
-• 配置访问该存储库的用户，记住用户和密码，参考https://docs.aws.amazon.com/zh_cn/codecommit/latest/userguide/setting-up-gc.html?icmpid=docs_acc_console_connect_np
+    cp -r aws-cicd-pipeline/spring-tests ./
+    cd spring-tests
+    git init
+    git add .
+    git commit -m "first commit"
+    git remote add origin https://username:password@git-codecommit.ap-southeast-1.amazonaws.com/v1/repos/devops-template-project
+    git push -u origin master
 
-• 上传spring-test脚手架工程
+在亚马逊云科技管理控制台，进入CodeCommit，存储库devops-template-project中，查看脚手架代码是否上传成功
 
 #### 创建 Gitlab 服务器
 
