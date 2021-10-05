@@ -93,8 +93,7 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 • 配置 CodeCommit 相关参数(如果采用 CodeCommit)，通过 Manage Jenkins->Manage Credentials，Credentials 中添加新的全局 Credential，类型选择 Username+password, 填入 id 及 CodeCommit 中创建的用户名和密码。
 
-• DashBoard 中有 3 个预设的 pipeline. 点击进入修改 pipeline 脚本的参数，包括 GIT_REPOSITORY、AWS_DEFAULT_REGION、AWS_S3_BUCKET_CODE_PACKAGE、SONAR_TOKEN、访问凭证，保存该 pipeline。
-如果是使用 codecommit 的 pipeline，勾选 poll scm,并设置 schedule 为*/1 * \* \* \*，即每分钟轮询一次变化。
+• DashBoard 中有 3 个预设的 pipeline. 点击进入修改 cicd-pipeline-codecommit-codedeploy 脚本的参数，包括 GIT_REPOSITORY、AWS_DEFAULT_REGION、AWS_S3_BUCKET_CODE_PACKAGE、SONAR_TOKEN、访问凭证，保存该 pipeline。
 
 • 如果使用Gitlab,配置 Gitlab 相关参数(如果采用 Gitlab)，配置 Gitlab connections，输入 Connection name，Gitlab host URL 为 Gitlab 服务器 URL，Credentials 中添加新的全局 Credential，类型选择 Gitlab API,API Token 填入 Gitlab 创建的 Access Token。测试 Gitlab Connection 成功。 
 点击 cicd-pipeline，在 Pipeline 配置页面的构建触发器设置中，查看 Build when a change is pushed to GitLab. GitLab webhook URL，并记住该 URL 地址。点击高级展开选项，设置生成新的 Screte token，记住该 Token。
