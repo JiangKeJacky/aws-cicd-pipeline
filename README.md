@@ -101,7 +101,7 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 ### 4. 配置 CodeDeploy 服务
 
-• 在本地命终端令行或Cloud9中运行创建IAM角色和策略，将create-codedeploy-project.sh中的 <font  color = red >arn:aws:iam::300835872711:role/CodeDeployServiceRole</font> 的 300835872711 修改为自己的 aws 账号，执行脚本： 
+• 在本地命终端令行或Cloud9中运行创建IAM角色和策略，将create-codedeploy-project.sh中的arn:aws:iam::**300835872711**:role/CodeDeployServiceRole 的 **300835872711** 修改为自己的 aws 账号，执行脚本： 
 
     vim create-codedeploy-project.sh
     ./create-codedeploy-role.sh
@@ -111,7 +111,7 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 （如果已有可运行应用的服务器，并且已经安装了CodeDeploy agent，此步骤可以略过）
 
-•	一条命令一条命令执行create-deployment-ec2.sh, 注意修改安全组id<font  color = red ><security-groups></font>新建的安全组id以及子网id<font  color = red ><subnet-id></font>，将自动创建3个台EC2服务器
+•	一条命令一条命令执行create-deployment-ec2.sh, 注意修改安全组id**<security-groups>**新建的安全组id以及子网id**<subnet-id>**，将自动创建3个台EC2服务器
 
     aws ec2 create-security-group --group-name CodeDeployDemo-SG --description "CodeDeployDemo test security group"
 
