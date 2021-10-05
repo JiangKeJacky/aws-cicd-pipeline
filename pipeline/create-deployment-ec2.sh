@@ -16,7 +16,7 @@ aws autoscaling create-launch-configuration \
   --launch-configuration-name CodeDeployDemo-AS-Configuration \
   --image-id ami-0e8e39877665a7c92 \
   --key-name ee-default-keypair \
-  --security-groups sg-0b9496ca3039fbb4d \
+  --security-groups sg-02e0432a604c76008 \
   --iam-instance-profile CodeDeployDemo-EC2-Instance-Profile \
   --instance-type t3.small
 
