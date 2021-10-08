@@ -12,6 +12,8 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 确保本地已安装aws cli及配置aws用户凭证的环境变量
 
+本地开发环境的java版本为openjdk 1.8.0以上，本地maven版本3.8.1
+
 本地开发环境下载安装git，http://git-scm.com/downloads
 
 在本地开发环境或Cloud9的终端命令行执行以下命令，将pipeline及脚手架工程下载到本地： 
