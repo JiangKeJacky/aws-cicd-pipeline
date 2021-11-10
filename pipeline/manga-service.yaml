@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: manga-service
+  namespace: manga-namespace
+  labels:
+    app: manga-app
+spec:
+  selector:
+    app: manga-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  namespace: manga-namespace
+  labels:
+    app: manga-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: manga-app
+    spec:
+      containers:
+        - name: manga
+          image: 013918142362.dkr.ecr.cn-northwest-1.amazonaws.com.cn/spring-test-unit:latest
+          imagePullPolicy: IfNotPresen
+          ports:
+            - containerPort: 8080

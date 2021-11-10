@@ -36,14 +36,15 @@ pipeline {
 
         //AWS access key
         AWS_DEFAULT_REGION="ap-southeast-1"
-        //AWS_ACCESS_KEY_ID="ASIAQBSPDQ6TNCPJMLN4"
-        //AWS_SECRET_ACCESS_KEY="eqfGoU9SQ4Sa6lKziMiABsX/i7EI24h2mv6d0aZ4"
+        AWS_ACCESS_KEY_ID="ASIAQBSPDQ6TNCPJMLN4"
+        AWS_SECRET_ACCESS_KEY="eqfGoU9SQ4Sa6lKziMiABsX/i7EI24h2mv6d0aZ4"
         //AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjEDUaCXVzLWVhc3QtMSJHMEUCIQDJbRbUl319yDQ7kWToIY3ziQSvPMVG97KAGHJEPGlCigIgNoOm2o4uaiJIr9alSb8ZSf2+AQzAis06C3feEJnYyE0qnwII7f//////////ARAAGgwwMDMzODcxMzE4MTQiDF+/XsLywyfnG8t1ByrzAbPYbxtCD91ibdGRcXfUR89qy8xU2fBCki22zHhQUXB1y0avgrtfMLuGxs0m5I/Eb/r4GYO88KqGim1zv6fmNcLLOOKe43FnE0lTqBYxM1u6V9AQpeZJCbxCSH4bmqYIdoFK51K4BehOAnWyXWTbQcszFrskUcYtUSaCiEYtB1+/Y0RJh9ToOj2gMFGFh/a++Vv4kElRK8QSi/eHlU9hcwk8JE+FhrOgIgEGQIsuRI44FX0Ps2KKPdHNMo9IJNuqSG8zG1m5CHHTkrejkms0EoOCS+q+mFbruaY+nHZLN2odipMvMh3S+CbM/1p0rHFjB3+nxzCG65eGBjqeAZ9eg9dbPgwzkRbNwQjCDk7JaQ5FoJOs2nRpXkZCaZqwejO91pEEPgEFS2mfSq0lTPr+qC7n0YCoWuod29+tXJYCgS+57GPzXhIhNuxDbwwnxfDI+MrBM82SJ9jsta9hi37FqzpQPyRP4fJNHrEJwmUGzi9O5t1YMiCitzvFl0Xfo8yoch3FGToxuLW6dHAneGat3bSNi5xh2GKyX9mp"
 
         //s3 bucket for store the code package, should be created before the pipeline first run
         AWS_S3_BUCKET_CODE_PACKAGE      = "devops-template-build-packages"
 
         ECR_REPO_URL = "013918142362.dkr.ecr.cn-northwest-1.amazonaws.com.cn"
+        EKS_CLUSTER_NAME = "MyCluster2"
 
         //initialize codedeploy for a pipeline should be done before the pipeline first run
         AWS_DEPLOYMENT_APPLICATION_NAME = "SpringBoot_Test"
@@ -115,14 +116,13 @@ pipeline {
         stage('MakeDockerImage') {
             steps{
                     script{
-
                         def DOCKER_SCRIPT = '''
                         cp Dockerfile target/
                         cd target
-                        aws ecr get-login-password --region cn-northwest-1 | docker login --username AWS --password-stdin 013918142362.dkr.ecr.cn-northwest-1.amazonaws.com.cn
+                        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URL}
                         docker build -t ${PROJECT_NAME} .
-                        docker tag ${PROJECT_NAME}:latest ${ECR_REPO_URL/${PROJECT_NAME}:latest
-                        docker push ${ECR_REPO_URL/${PROJECT_NAME}:latest
+                        docker tag ${PROJECT_NAME}:latest ${ECR_REPO_URL}/${PROJECT_NAME}:latest
+                        docker push ${ECR_REPO_URL}/${PROJECT_NAME}:latest
                         '''
                         sh DOCKER_SCRIPT
                     }
@@ -132,46 +132,16 @@ pipeline {
 	    stage('Deploy') {
 		    steps{
 				script{
-
 					def DEPLOY_SCRIPT = '''
-							   aws --region ${AWS_DEFAULT_REGION} deploy create-deployment \
-							   --application-name ${AWS_DEPLOYMENT_APPLICATION_NAME} \
-							   --deployment-group-name ${AWS_DEPLOYMENT_GROUP} \
-							   --deployment-config-name CodeDeployDefault.OneAtATime \
-							   --s3-location bucket=${AWS_S3_BUCKET_CODE_PACKAGE},key=${APPLICATION_DIR}_${VERSION_NUMBER}.zip,bundleType=zip
+					           aws eks --region ${AWS_DEFAULT_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}
+					           kubectl create namespace mange-namespace
+					           kubectl apply -f /home/ec2-user/manga-service.yaml
 							   '''
 				  result = sh returnStdout: true, script: DEPLOY_SCRIPT
 				  result = result.trim()
 				  echo result
-				  def deployment = new JsonSlurper().parseText(result)
-				  if (deployment == null) error 'Deploy fail'
-				  DEPLOY_ID =  deployment.deploymentId
-				    //result = sh returnStdout: true, script: DEPLOY_STATUS
-				  echo DEPLOY_ID
-				  if (DEPLOY_ID == null || DEPLOY_ID == "") error 'Deploy fail'
 				}
 
-				timeout(2) {
-    				waitUntil {
-        				script {
-        				    def DEPLOY_STATUS = '''aws deploy get-deployment --deployment-id '''.concat("${DEPLOY_ID}").concat(''' --query "deploymentInfo.status" --output text ''')
-        				    //sh DEPLOY_STATUS
-        				    result = sh returnStdout: true, script: DEPLOY_STATUS
-        				    echo "Deploy status: " + result
-        				    if (result.trim().contains("Failed")) {
-        				        error 'Deployment failed'
-        				        return true
-        				    }
-        				    if (result.trim().contains("Succeeded")) {
-        				        echo "Deployment succeeded"
-        				        return true
-        				    }
-
-        				    return false
-        				}
-
-                    }
-    		    }
 		    }
 	    }
 
