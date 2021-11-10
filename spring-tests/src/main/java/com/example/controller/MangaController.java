@@ -41,4 +41,11 @@ public class MangaController
         return mangaService.getMangasByTitle(title);
     }
 
+    @RequestMapping(value = "/helloworld", method = RequestMethod.GET)
+    public @ResponseBody String sayHello()
+    {
+        return "Hello world!";
+    }
+
+
 }

@@ -25,3 +25,4 @@ hs_err_pid*
 /sample_cli/
 /codebuild/
 /pipeline/dev/
+/.idea/

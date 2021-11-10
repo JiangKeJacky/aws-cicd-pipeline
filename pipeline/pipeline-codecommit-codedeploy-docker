@@ -114,6 +114,8 @@ pipeline {
         }
 
         stage('MakeDockerImage') {
+
+            //require ak/sk in environment to call eks api
             steps{
                     script{
                         def DOCKER_SCRIPT = '''
