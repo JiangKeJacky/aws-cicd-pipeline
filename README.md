@@ -119,6 +119,16 @@ spring-test是一个包含单元测试、部署规范、部署脚本的spring工
 
 •	SSH登陆jenkins服务器，编辑/home/jenkins/robot/ACT.robot，其中修改Library REST的URL路径为以上应用访问路径.
 
+### 7. 配置容器服务（使用容器部署）
+
+#### 创建ECR存储库
+
+在亚马逊云科技控制进入ECR服务，创建存储库，修改Jenkins的pipeline-codecommit-codedeploy-docker中ECR_REPO_URL为存储库的URI
+
+#### 创建EKS集群 （如有已有集群则略过）
+
+修改Jenkins的pipeline-codecommit-codedeploy-docker中EKS_CLUSTER_NAME为存储库的集群名
+
 ## 运行使用
 
 修改提交项目的代码，提交到 Gitlab，将触发 Jenkins 的 CICD pipeline，可以在 Jenkins 中查看 CICD 进度
