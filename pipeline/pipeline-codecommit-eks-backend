@@ -1,0 +1,182 @@
+pipeline {
+	agent any
+
+   	options {
+        	buildDiscarder(logRotator(numToKeepStr: '5',daysToKeepStr:'16'))
+        	timeout(time: 30, unit: 'MINUTES')
+    	}
+
+    // parameters {
+
+    //     string(name: 'GIT_REPO', defaultValue: 'https://test.com/scm/myproject.git', description: '')
+    //     choice(choices: ['dev', 'qa', 'prd'], description: '', name: 'RUN_ENV')
+    // }
+
+    environment {
+
+        //应用名
+        PROJECT_NAME            = "meeting-backend"
+
+        RUN_ENV                 = "prd"
+        VERSION_NUMBER          = "0.0.${BUILD_NUMBER}.${RUN_ENV}"
+        APPLICATION_DIR         = "${PROJECT_NAME}"
+
+        //GIT repository，替换为工程CodeCommit代码库的地址
+        GIT_REPOSITORY = "https://git-codecommit.cn-northwest-1.amazonaws.com.cn/v1/repos/meeting-backend"
+
+        AWS_DEFAULT_REGION      ="cn-northwest-1"
+
+        //AWS用户的Access Key，在AWS控制台的IAM服务-用户-安全证书-访问密钥中生成，此用户需要有访问ECR、EKS集群的权限
+        //在Jenkins的Manage System-Manage Crenditial中创建或修改id为aws-secret-key-id的类型为serect text的crenditial，值为AWS用户Access Key
+        AWS_ACCESS_KEY_ID       = credentials('aws-secret-key-id')
+
+        //AWS用户的Secret Key，在AWS控制台的IAM服务-用户-安全证书-访问密钥中生成，此用户需要有访问ECR、EKS集群的权限
+        //在Jenkins的Manage System--Manage Crenditial中创建或修改id为aws-secret-access-key的类型为serect text的crenditial，值为AWS用户的Secret Key
+        AWS_SECRET_ACCESS_KEY   = credentials('aws-secret-access-key')
+
+        //ECR容器镜像仓库地址
+        ECR_REPO_URL = "013918142362.dkr.ecr.cn-northwest-1.amazonaws.com.cn"
+
+        //添加MAVEN路径
+        PATH = "/usr/local/lib/apache-maven-3.8.1/bin:$PATH"
+
+        //sonar访问地址
+        SONAR_SERVER = "http://localhost:9000"
+
+        //sonar访问token，在sonar的Administration-Security-User中创建
+        SONAR_TOKEN = "f8b5849dba5031a26532fd5d2cf151f697bf50da"
+
+    }
+
+    stages {
+
+        stage('Source') {
+            steps {
+                //在Jenkins的Manage System--Manage Crenditial中创建或修改id为codecommit-user的类型为username+password的crenditial，
+                //crenditial值为AWS用户的CodeCommit用户名和密码，
+                //AWS用户的CodeCommit用户名和密码，在AWS控制台的IAM服务-用户-安全证书-AWS CodeCommit的HTTPS Git凭证中生成，
+                //此用户需要有访问CodeCommit对应存储库的权限
+                git credentialsId: 'codecommit-user', url: "${GIT_REPOSITORY}"            }
+        }
+
+        //sonar代码扫描，配置sonar地址及token后启用
+//        stage('SourceScan'){
+//            steps{
+//                sh "mvn clean verify sonar:sonar  -Dsonar.host.url=${SONAR_SERVER} -Dsonar.login=${SONAR_TOKEN} -Pcoverage"
+//            }
+//        }
+
+        stage('Compile') {
+            steps {
+               script{
+                    def SCRIPT = '''
+                    cd base
+                    mvn clean compile
+                    '''
+                 sh SCRIPT
+               }
+            }
+        }
+
+        //编写单元测试后启用
+//        stage('UnitTest') {
+//            steps {
+//                //单元测试
+//                sh "mvn -Dtest=com.mgiglione.service.test.unit.UnitTests test"
+//            }
+//        }
+
+        //编写集成测试后启用
+//        stage('IntegrationTest') {
+//            steps {
+//                //集成测试
+//                sh "mvn -Dtest=com.mgiglione.service.test.integration.IntegrationTests test"
+//            }
+
+//        }
+
+        stage('Package') {
+            steps {
+
+                //base路径根据工程而不同，建议把POM.xml文件放在工程的根目录
+                script{
+                    def SCRIPT = '''
+                    cd base
+                    mvn -Dmaven.test.skip=true package
+                    '''
+                    sh SCRIPT
+                }
+
+            }
+        }
+
+        stage('DockerImage') {
+            steps{
+                    script{
+
+                        //ECR登录的文档可以参考文档https://docs.aws.amazon.com/zh_cn/AmazonECR/latest/userguide/getting-started-cli.html
+                        def DOCKER_SCRIPT = '''
+                        cp Dockerfile web/target/
+                        cd web/target
+                        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URL}
+                        docker build -t ${PROJECT_NAME} .
+                        docker tag ${PROJECT_NAME}:latest ${ECR_REPO_URL}/${PROJECT_NAME}:latest
+                        docker push ${ECR_REPO_URL}/${PROJECT_NAME}:latest
+                        '''
+                        sh DOCKER_SCRIPT
+                    }
+            }
+        }
+
+	    stage('Deploy') {
+		    steps{
+				script{
+
+					def SCRIPT = '''
+					          cd /app/eks
+					          kubectl apply -f meeting-backend-deployment.yaml
+							  kubectl set image -n meeting-app deployment/meeting-linux-deployment meeting-backend=${ECR_REPO_URL}/${PROJECT_NAME}:latest
+							  kubectl rollout restart -n meeting-app deployment/meeting-linux-deployment
+							   '''
+					sh SCRIPT
+				}
+
+		    }
+	    }
+
+        //需要在ACT.robot中编写API的测试用例
+	    stage('AutomaticTest') {
+            steps {
+                sleep 5
+                script{
+                    def TEST_SCRIPT = '''
+                        cd /home/jenkins
+                        python3 -m robot --outputdir results robot/ACT.robot
+                    '''
+                    sh TEST_SCRIPT
+                }
+            }
+        }
+	}
+
+	post {
+	    //需要在Jenkins的Manage System-System Configure中配置mail服务的smtp服务
+	    success {
+            emailext(to: 'kejian@amazon.com',
+                subject: '[CICD] ${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!',
+                body: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!. Check console output at ${BUILD_URL} to view the results.',
+                compressLog: true, attachLog: true,
+                attachmentsPattern: 'report.html')
+	        //mail body: 'Jenkins Pipeline Build #${env.BUILD_NUMBER} Finished. Check console output at $BUILD_URL to view the results.', from: 'kejian@amazon.com', replyTo: 'kejian@amazon.com', subject: 'mail ${env.PROJECT_NAME - Build # ${env.BUILD_NUMBER} - ${env.BUILD_STATUS}!', to: 'kejian@amazon.com'
+
+	    }
+	    failure {
+            emailext(to: 'kejian@amazon.com',
+                subject: '[CICD] ${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!',
+                body: '${PROJECT_NAME} - Build # ${BUILD_NUMBER} - ${BUILD_STATUS}!. Check console output at ${BUILD_URL} to view the results.',
+                compressLog: true, attachLog: true,
+                attachmentsPattern: 'report.html')
+	    }
+	}
+
+}
