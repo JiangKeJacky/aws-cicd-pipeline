@@ -63,7 +63,7 @@ public class MangaControllerIntegrationTest
         mockMvc.perform(get("/manga/sync/ken")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$...title", hasItem(is("Sun-Ken Rock"))));
+                .andExpect(jsonPath("$..title", hasItem(is("Sun-Ken Rock"))));
 
         //下面是一个会执行失败的测试用例（条件判断返回假）
 //        mockMvc.perform(get("/manga/sync/ken")
@@ -92,7 +92,7 @@ public class MangaControllerIntegrationTest
         mockMvc.perform(asyncDispatch(result))
                .andDo(print())
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$...title", hasItem(is("Kenma Kensou Kensei Kenbu"))));
+               .andExpect(jsonPath("$..title", hasItem(is("Kenma Kensou Kensei Kenbu"))));
 
         //下面是一个会执行失败的测试用例（条件返回假）
 //        mockMvc.perform(asyncDispatch(result))
