@@ -18,7 +18,7 @@ public class MangaService
     private static final Logger logger = LoggerFactory.getLogger(MangaService.class);
 
     //互联网上现存的API服务
-    private static final String MANGA_SEARCH_URL="https://api.jikan.moe/v3/search/manga?q=";
+    private static final String MANGA_SEARCH_URL="https://api.jikan.moe/v4/search/manga?q=";
 
     @Autowired
     RestTemplate restTemplate;
