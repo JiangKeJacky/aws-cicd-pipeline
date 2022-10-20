@@ -62,6 +62,7 @@ public class MangaControllerIntegrationTest
         //直接可以获取真实的返回结果
         mockMvc.perform(get("/manga/sync/ken")
                 .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[*].titles[*].title", hasItem(is("Sun-Ken Rock"))));
 
