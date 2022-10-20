@@ -28,7 +28,7 @@ public class MangaController
 
     @RequestMapping(value = "/async/{title}", method = RequestMethod.GET)
     @Async
-    public CompletableFuture<List<Manga>> searchASync(@PathVariable(name = "title") String title)
+    public @ResponseBody CompletableFuture<List<Manga>> searchASync(@PathVariable(name = "title") String title)
     {
         logger.info("[[ CI_CD_Tool ]] searchASync() in");
         return CompletableFuture.completedFuture(mangaService.getMangasByTitle(title));
