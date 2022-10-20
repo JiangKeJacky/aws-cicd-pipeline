@@ -1,0 +1,28 @@
+<assembly>
+    <!-- 项目打成Zip包的Id -->
+    <id>bin</id>
+    <formats>
+        <!-- 包的后缀 -->
+        <format>zip</format>
+    </formats>
+    <!-- 使用assembly拷贝依赖包 -->
+    <!--<dependencySets>-->
+    <!--<dependencySet>-->
+    <!--&lt;!&ndash; 是否包含自己（将项目生成的jar包也输出到lib目录） &ndash;&gt;-->
+    <!--<useProjectArtifact>false</useProjectArtifact>-->
+    <!--<outputDirectory>lib</outputDirectory>-->
+    <!--</dependencySet>-->
+    <!--</dependencySets>-->
+    <fileSets>
+        <!-- 从目标目录拷贝文件去压缩 -->
+        <fileSet>
+            <directory>./</directory>
+            <includes>
+                <include>target/*.jar</include>
+                <include>appspec.yml</include>
+                <include>scripts/*</include>
+            </includes>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+    </fileSets>
+</assembly>
