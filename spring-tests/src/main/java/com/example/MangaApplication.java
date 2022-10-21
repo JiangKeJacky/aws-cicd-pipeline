@@ -1,6 +1,6 @@
-package com.mgiglione;
+package com.example;
 
-import com.mgiglione.utils.JsonUtils;
+import com.example.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
 
 //代码扫描根路径
-@SpringBootApplication(scanBasePackages = { "com.mgiglione" })
+@SpringBootApplication(scanBasePackages = { "com.example" })
 @EnableAsync
 public class MangaApplication
 {

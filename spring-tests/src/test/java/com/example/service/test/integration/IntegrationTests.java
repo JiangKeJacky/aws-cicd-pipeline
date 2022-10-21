@@ -1,4 +1,4 @@
-package com.mgiglione.service.test.integration;
+package com.example.service.test.integration;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

@@ -1,4 +1,4 @@
-package com.mgiglione.service.test.unit;
+package com.example.service.test.unit;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
