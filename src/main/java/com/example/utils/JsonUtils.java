@@ -1,9 +1,9 @@
-package com.mgiglione.utils;
+package com.example.utils;
 
 import java.io.File;
 import java.io.IOException;
 
-import com.mgiglione.model.MangaResult;
+import com.example.model.MangaResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class JsonUtils
 
 	public static <T> T json2Object(String str, Class<T> clazz) throws IOException
 	{
-		logger.info("com.mgiglione.utils.JsonUtils.json2Object() "
+		logger.info("com.example.utils.JsonUtils.json2Object() "
 				  + "str = " + str + ", class = " + clazz.getName());
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -75,8 +75,8 @@ public class JsonUtils
 	{
 		try
 		{
-			MangaResult mRs = JsonUtils.jsonFile2Object("Victor.json", MangaResult.class);
-			System.out.print(mRs.getResults().size());
+			MangaResult mRs = JsonUtils.jsonFile2Object("jacky.json", MangaResult.class);
+			System.out.print(mRs.getData().size());
 		}
 		catch (Exception e)
 		{

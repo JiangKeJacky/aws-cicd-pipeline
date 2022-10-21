@@ -1,4 +1,4 @@
-package com.mgiglione.service.test.unit;
+package com.example.service.test.unit;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.model.MangaResult;
+import com.example.model.Title;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,9 +30,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.mgiglione.controller.MangaController;
-import com.mgiglione.model.Manga;
-import com.mgiglione.service.MangaService;
+import com.example.controller.MangaController;
+import com.example.model.Manga;
+import com.example.service.MangaService;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -53,6 +55,8 @@ public class MangaControllerUnitTest
      */
     private List<Manga> mangas;
 
+    private MangaResult mangaResult;
+
     private static final Logger logger = LoggerFactory.getLogger(MangaControllerUnitTest.class);
 
     @Before
@@ -65,13 +69,17 @@ public class MangaControllerUnitTest
         //this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build(); //使用外部运行的web容器运行
 
         //构造两个MANGA对象
+        List<Title> titles = new ArrayList<Title>();
+        titles.add(Title.builder().title("Hokuto no ken").type("english").build());
         Manga manga1 = Manga.builder()
-                            .title("Hokuto no ken")
+                            .titles(titles)
                             .synopsis("The year is 199X. The Earth has been devastated by nuclear war...")
                             .build();
 
+        titles = new ArrayList<Title>();
+        titles.add(Title.builder().title("Yumekui Kenbun").type("english").build());
         Manga manga2 = Manga.builder()
-                            .title("Yumekui Kenbun")
+                            .titles(titles)
                             .synopsis("For those who suffer nightmares, help awaits at the Ginseikan Tea House, "
                                     + "where patrons can order much more than just Darjeeling. "
                                     + "Hiruko is a special kind of a private investigator. He's a dream eater....")
@@ -80,6 +88,8 @@ public class MangaControllerUnitTest
         mangas = new ArrayList<>();
         mangas.add(manga1);
         mangas.add(manga2);
+
+        mangaResult = MangaResult.builder().data(mangas).build();
 
         logger.info("[[ CI_CD_Tool ]] setup() out");
 
@@ -97,8 +107,8 @@ public class MangaControllerUnitTest
         //实际上单元测试需要测试的是除被MOCK方法以外的，属于本方法自己的逻辑实现，
         mockMvc.perform(get("/manga/sync/ken").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title", is("Hokuto no ken")))
-                .andExpect(jsonPath("$[1].title", is("Yumekui Kenbun")));
+                .andExpect(jsonPath("$[0].titles[0].title", is("Hokuto no ken")))
+                .andExpect(jsonPath("$[1].titles[0].title", is("Yumekui Kenbun")));
 
         logger.info("[[ CI_CD_Tool ]] testSearchSync() out");
     }
@@ -125,7 +135,7 @@ public class MangaControllerUnitTest
         mockMvc.perform(asyncDispatch(result))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title", is("Hokuto no ken")));
+                .andExpect(jsonPath("$[0].titles[0].title", is("Hokuto no ken")));
 
         logger.info("[[ CI_CD_Tool ]] testSearchASync() out");
 

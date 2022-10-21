@@ -1,13 +1,13 @@
-package com.mgiglione.model;
+package com.example.model;
 
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Builder
 public class MangaResult
 {
-    private List<Manga> results;
+    private Pagination pagination;
+    private List<Manga> data;
 }

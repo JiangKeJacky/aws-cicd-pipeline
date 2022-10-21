@@ -1,4 +1,4 @@
-package com.mgiglione.service.test.unit;
+package com.example.service.test.unit;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
+import com.example.model.Manga;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -19,10 +20,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.mgiglione.model.Manga;
-import com.mgiglione.model.MangaResult;
-import com.mgiglione.service.MangaService;
-import com.mgiglione.utils.JsonUtils;
+import com.example.model.MangaResult;
+import com.example.service.MangaService;
+import com.example.utils.JsonUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -47,19 +47,19 @@ public class MangaServiceUnitTest
         logger.info("[[ CI_CD_Tool ]] testGetMangasByTitle() in");
 
         // Parsing mock file
-        MangaResult mRs = JsonUtils.jsonFile2Object("Victor.json", MangaResult.class);
+        MangaResult mRs = JsonUtils.jsonFile2Object("jacky.json", MangaResult.class);
 
         // Mock template 对象（输入的两个任何参数，都返回来自自定义文件的，固定的JSON结果对象）
         when(template.getForEntity(any(String.class), any(Class.class))).thenReturn(new ResponseEntity(mRs, HttpStatus.OK));
 
         // I search for goku but system will use mocked response containing only ken, so I can check that mock is used.
-        List<Manga> mangasByTitle = mangaService.getMangasByTitle("goku");
+        List<Manga> mangasByTitle = mangaService.getMangasByTitle("ken");
 
         assertThat(mangasByTitle).isNotNull()
                                  .isNotEmpty()
-                                 .anyMatch(p -> p.getTitle()
+                                 .anyMatch(p -> p.getTitles().get(0).getTitle()
                                  .toLowerCase()
-                                 .contains("manga"));
+                                 .contains("ken"));
 
         logger.info("[[ CI_CD_Tool ]] testGetMangasByTitle() out");
 

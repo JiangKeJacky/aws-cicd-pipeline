@@ -1,9 +1,10 @@
-package com.mgiglione.service.test.integration;
+package com.example.service.test.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import com.example.model.Manga;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -12,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.mgiglione.model.Manga;
-import com.mgiglione.service.MangaService;
+import com.example.service.MangaService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

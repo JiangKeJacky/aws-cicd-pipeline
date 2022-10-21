@@ -1,15 +1,15 @@
-package com.mgiglione.service;
+package com.example.service;
 
 import java.util.List;
 
+import com.example.model.MangaResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.mgiglione.model.Manga;
-import com.mgiglione.model.MangaResult;
+import com.example.model.Manga;
 
 @Service
 public class MangaService
@@ -29,7 +29,7 @@ public class MangaService
         logger.info("[[ CI_CD_Tool ]] getMangasByTitle()， "
                   + "url = " + MANGA_SEARCH_URL + title);
 
-        return restTemplate.getForEntity(MANGA_SEARCH_URL + title, MangaResult.class).getBody().getResults();
+        return restTemplate.getForEntity(MANGA_SEARCH_URL + title, MangaResult.class).getBody().getData();
     }
 
 }
